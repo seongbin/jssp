@@ -89,8 +89,8 @@ function on_key_down(vkey) {
 				brw.populate();
 				break;
 			case VK_SPACEBAR: fb.PlayOrPause(); break;
-			case VK_LEFT: fb.RunMainMenuCommand("Playback/Seek/Back by 5 seconds"); break;
-			case VK_RIGHT: fb.RunMainMenuCommand("Playback/Seek/Ahead by 5 seconds"); break;
+			case VK_LEFT: vk_left(); break;
+			case VK_RIGHT: vk_right(); break;
 			case VK_UP:
 				if (brw.rows.length > 0 && !brw.keypressed && !cScrollBar.timerID) {
 					brw.keypressed = true;
@@ -329,9 +329,17 @@ function on_mouse_wheel(step) {
 	if (utils.IsKeyPressed(VK_CONTROL)) {
 		update_extra_font_size(step);
 	} else {
-		scroll -= step * ppt.rowHeight * ppt.rowScrollStep;
-		scroll = check_scroll(scroll);
-		brw.on_mouse("wheel", m_x, m_y, step);
+		if (m_y > brw.y && m_y < brw.y + brw.h) {
+			scroll -= step * ppt.rowHeight * ppt.rowScrollStep;
+			scroll = check_scroll(scroll);
+			brw.on_mouse("wheel", m_x, m_y, step);
+		} else {
+			if (step == 1) {
+				fb.VolumeUp();
+			} else {
+				fb.VolumeDown();
+			}
+		}
 	}
 }
 
@@ -389,10 +397,6 @@ function on_playback_stop(reason) {
 function on_playback_time() {
 	g_seconds++;
 	g_time = tfo.time.Eval();
-
-	if (brw.nowplaying_y + ppt.rowHeight > brw.y && brw.nowplaying_y < brw.y + brw.h) {
-		window.RepaintRect(brw.x, brw.nowplaying_y, brw.w, ppt.rowHeight);
-	}
 }
 
 function on_playlist_item_ensure_visible(playlist, index) {
@@ -846,8 +850,25 @@ function oBrowser() {
 					break;
 				case -2:
 					var subgroup_text = this.rows[i].subgroupName;
-					gr.WriteTextSimple(chars.label, g_font_material, fader_text, ax, ay + scale(1), ah, ah, 2, 2, 1, 1);
-					gr.WriteTextSimple(subgroup_text, g_font, fader_text, ax + ah, ay, aw - ah, ah, 0, 2, 1, 1);
+					var subgroupName = this.rows[i].subgroupName;
+					var albumId = this.rows[i].albumId;
+					var firstTrackIdx = -1;
+					var lastTrackIdx = -1;
+					for (var j = i + 1; j < this.rows.length; j++) {
+						if (this.rows[j].type != 0 || this.rows[j].albumId != albumId || !this.rows[j].subgrouped) break;
+						var trackTitle = this.rows[j].track_tf.split(" ^^ ")[1];
+						if (trackTitle && trackTitle.indexOf(":") !== -1 && trackTitle.split(":")[0].trim() === subgroupName) {
+							if (firstTrackIdx === -1) firstTrackIdx = j;
+							lastTrackIdx = j;
+						}
+					}
+					if (firstTrackIdx !== -1 && ppt.enableRowStripe) {
+						var sub_ay = Math.floor(this.y + (firstTrackIdx * ah) - scroll_);
+						var sub_ah = (lastTrackIdx - firstTrackIdx + 1) * ah;
+						fillRectangle(gr, ax, sub_ay, aw, sub_ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, 8));
+					}
+
+					gr.WriteTextSimple(subgroup_text, g_font, setAlpha(g_colour_text, 150), ax, ay, aw, ah, 0, 2, 1, 1);
 
 					/*
 					var subgroup_text_width = Math.min(subgroup_text.calc_width2(g_font), aw - M * 2);
@@ -860,9 +881,17 @@ function oBrowser() {
 					break;
 				case 0:
 					// odd/even background
-					if (ppt.enableRowStripe) {
+					var albumId = this.rows[i].albumId;
+					var rowAlbumHasSubgroup = false;
+					for (var k = 0; k < this.rows.length; k++) {
+						if (this.rows[k].albumId == albumId && this.rows[k].subgrouped) {
+							rowAlbumHasSubgroup = true;
+							break;
+						}
+					}
+					if (ppt.enableRowStripe && !rowAlbumHasSubgroup) {
 						if (ppt.enableGroupHeader ? this.rows[i].albumTrackId % 2 != 0 : i % 2 == 0) {
-							fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, 4)); // setAlpha(this.groups[this.rows[i].albumId].dominant, 4)
+							fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, window.IsDark ? 4 : 8));
 						}
 					}
 
@@ -882,10 +911,11 @@ function oBrowser() {
 
 					if (is_playing) {
 						this.nowplaying_y = ay;
+						fillRectangle(gr, ax, ay, aw * fb.PlaybackTime / fb.PlaybackLength, ah, ppt.enableRoundedCorner, setAlpha(g_colour_highlight, 48));
 					}
 
 					if (is_selected) {
-						fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, 24));
+						// fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, 24));
 					}
 
 					if (is_focused) {
@@ -975,9 +1005,14 @@ function oBrowser() {
 		this.drawBottomBar(gr);
 	}
 
+	this.vol2percentage = function (volume) {
+		return (Math.pow(10, volume / 50) - 0.01) / 0.99;
+	}
+
 	this.drawHeaderBar = function (gr) {
-		fillRectangle(gr, this.hx, this.hy, this.hw, this.hh, false, !ppt.enableDynamicColours ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background);
-		gr.FillRectangle(this.hx, this.hy + this.hh - 1, this.hw, 1, shade_colour(g_colour_background, 15));
+		var background = !ppt.enableDynamicColours ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background;
+		fillRectangle(gr, this.hx, this.hy, this.hw, this.hh, false, background);
+		gr.FillRectangle(this.hx, this.hy + this.hh - 1, this.hw, 1, setAlpha(g_colour_text, 16));
 
 		this.inputbox.draw(gr, this.x + this.inputbox.h + 10, (this.hh - this.inputbox.h) * 0.5);
 		gr.WriteTextSimple(chars.search, g_font_material, this.inputbox.edit ? g_colour_highlight : setAlpha(g_colour_text, 100), this.inputbox.x - this.inputbox.h - 5, this.inputbox.y, this.inputbox.h, this.inputbox.h, 2, 2, 1, 1);
@@ -1012,11 +1047,20 @@ function oBrowser() {
 		this.btn_next.draw(gr, x - w * 3, y);
 		this.btn_prev.draw(gr, x - w * 4, y);
 		this.btn_play.draw(gr, x - w * 5, y);
+
+		if (g_volume_timer) {
+			var volume_text = Math.ceil(this.vol2percentage(fb.Volume) * 100) + "%";
+			var volume_text_width = volume_text.calc_width2(g_font_fixed) + M;
+			var volume_text_x = x - w * 5 - volume_text_width - M * 0.5;
+			fillRectangle(gr, volume_text_x, y, volume_text_width, h, ppt.enableRoundedCorner, shade_colour(background, 10));
+			drawRectangle(gr, volume_text_x, y, volume_text_width, h, ppt.enableRoundedCorner, tint_colour(background, 10));
+			gr.WriteTextSimple(volume_text, g_font_fixed, setAlpha(g_colour_text, 200), volume_text_x, this.hy, volume_text_width, this.hh, 2, 2, 1, 1);
+		}		
 	}
 
 	this.drawBottomBar = function (gr) {
-		fillRectangle(gr, this.bx, this.by, this.bw, this.bh, false, !ppt.enableDynamicColours ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background);
-		gr.FillRectangle(this.bx, this.by, this.bw, 1, shade_colour(g_colour_background, 10));
+		var background = !ppt.enableDynamicColours ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background;
+		fillRectangle(gr, this.bx, this.by, this.bw, this.bh, false, background);
 	}
 
 	this.selectGroupTracks = function (aId) {
@@ -1606,11 +1650,14 @@ function oBrowser() {
 		}
 		if (need_repaint) {
 			need_repaint = false;
-			// window.RepaintRect(0, 0, ww, brw.hh + brw.h);
 			window.Repaint();
 		}
 
 		scroll_prev = scroll;
+
+		if (fb.IsPlaying && !fb.IsPaused && fb.PlaybackLength) {
+			window.RepaintRect(brw.x, brw.nowplaying_y, brw.w, ppt.rowHeight);
+		}
 
 	}, ppt.refreshRate);
 
@@ -1688,6 +1735,14 @@ function kill_scrollbar_timer() {
 		window.ClearTimeout(cScrollBar.timerID);
 		cScrollBar.timerID = false;
 	}
+}
+
+function vk_left() {
+	return fb.RunMainMenuCommand("Playback/Seek/Back by 5 seconds");
+}
+
+function vk_right() {
+	return fb.RunMainMenuCommand("Playback/Seek/Ahead by 5 seconds");
 }
 
 function vk_up() {
@@ -1769,6 +1824,17 @@ function on_font_changed() {
 	brw.repaint();
 }
 
+function on_volume_change() {
+	window.RepaintRect(brw.hx, brw.hy, brw.hw, brw.hh);
+	if (g_volume_timer) {
+		window.ClearTimeout(g_volume_timer);
+	}
+	g_volume_timer = window.SetTimeout(function () {
+		g_volume_timer = 0;
+		window.RepaintRect(brw.hx, brw.hy, brw.hw, brw.hh);
+	}, 1500);
+}
+
 function on_size() {
 	ww = window.Width;
 	wh = window.Height;
@@ -1826,6 +1892,8 @@ ppt.enableGroupHeader = window.GetProperty("SMOOTH.GROUP.HEADER.ENABLED", true);
 ppt.enableRowDual = window.GetProperty("SMOOTH.ROW.DUAL.ENABLED", false);
 ppt.enableRowStripe = window.GetProperty("SMOOTH.ROW.STRIPE.ENABLED", true);
 
+ppt.t1_tf = "%playback_time_seconds%";
+ppt.t2_tf = "%length_seconds%";
 ppt.time_tf = "$if3(-%playback_time_remaining%,%playback_time%,)";
 ppt.track_tf = "$if2([%artist%],N/A) ^^ [%title%] ^^ [%genre%] ^^ [%album%] ^^ $if2($num([%tracknumber%],1),00) ^^ [%length%] ^^ $if2(%rating%,0) ^^ [%play_count%] ^^ [%added%] ^^ [%track artist%]";
 ppt.groupkey_tf = "$if2(%album%,$if(%length%,'('Singles')',%title%)) ^^ $if2(%album artist%,$if(%length%,%directory%,N/A)) ^^ $if2([%date%],N/A) ^^ $if3([%copyright%],[%url%],[%genre%]) ^^ $num([%totaltracks%],1) ^^ $if2(%discnumber%,1) ^^ $if2(%totaldiscs%,1)";
@@ -1847,6 +1915,7 @@ var g_time = "";
 var g_search_text = "";
 var g_search_index = 0;
 var g_search_indexes = [];
+var g_volume_timer = 0;
 
 var brw = new oBrowser();
 

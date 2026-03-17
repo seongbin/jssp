@@ -507,6 +507,7 @@ function get_font() {
 
 	g_font = smooth_font(name, size);
 	g_font_bold = smooth_font(name, size, DWRITE_FONT_WEIGHT_BOLD);
+	g_font_fixed = smooth_font(utils.CheckFont("Google Sans Code") ? "Google Sans Code" : "Consolas", size);
 	g_font_group1 = smooth_font(name, size + 6, DWRITE_FONT_WEIGHT_BOLD);
 	g_font_group2 = smooth_font(name, size + 2, DWRITE_FONT_WEIGHT_BOLD);
 	g_font_material = smooth_font("Material Icons", size + 2);
@@ -685,7 +686,6 @@ chars.add_folder = "\ue2cc";
 chars.edit_query = "\ue3c9";
 chars.close = "\ue14c";
 chars.disc = "\ue019",
-chars.label = "\ue937",
 chars.search = "\ue8b6";
 chars.dark = "\ue51c";
 chars.light = "\ue518";

@@ -1,7 +1,7 @@
 var cScrollBar = {
 	visible: true,
 	width: utils.GetSystemMetrics(2),
-	minCursorHeight: utils.GetSystemMetrics(3) * 2,
+	minCursorHeight: utils.GetSystemMetrics(3) * 4,
 	timerID: false,
 	timerCounter: -1
 };
@@ -15,31 +15,35 @@ function oScrollbar(parent) {
 
 	this.setCursorButton = function () {
 		var gb;
+		var sx = this.cursorw * 0.25;
+		var sy = 0;
+		var sw = this.cursorw * 0.50;
+		var sh = this.cursorh;
 
 		this.cursorImage_normal = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_normal.GetGraphics();
 		if (ppt.enableRoundedCorner) {
-			gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 50));
+			gb.FillRoundedRectangle(sx, sy, sw, sh, sw * 0.5, sw * 0.5, setAlpha(g_colour_text, 50));
 		} else {
-			fillRectangle(gb, this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, false, setAlpha(g_colour_text, 50));
+			fillRectangle(gb, sx, sy, sw, sh, false, setAlpha(g_colour_text, 50));
 		}
 		this.cursorImage_normal.ReleaseGraphics();
 
 		this.cursorImage_hover = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_hover.GetGraphics();
 		if (ppt.enableRoundedCorner) {
-			gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 100));
+			gb.FillRoundedRectangle(sx, sy, sw, sh, sw * 0.5, sw * 0.5, setAlpha(g_colour_text, 100));
 		} else {
-			fillRectangle(gb, this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, false, setAlpha(g_colour_text, 100));
+			fillRectangle(gb, sx, sy, sw, sh, false, setAlpha(g_colour_text, 100));
 		}
 		this.cursorImage_hover.ReleaseGraphics();
 
 		this.cursorImage_down = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_down.GetGraphics();
 		if (ppt.enableRoundedCorner) {
-			gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 150));
+			gb.FillRoundedRectangle(sx, sy, sw, sh, sw * 0.5, sw * 0.5, setAlpha(g_colour_text, 150));
 		} else {
-			fillRectangle(gb, this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, false, setAlpha(g_colour_text, 150));
+			fillRectangle(gb, sx, sy, sw, sh, false, setAlpha(g_colour_text, 150));
 		}
 		this.cursorImage_down.ReleaseGraphics();
 
@@ -49,8 +53,6 @@ function oScrollbar(parent) {
 	}
 
 	this.draw = function (gr) {
-		// gr.fillRectangle(this.x, this.y, this.w, this.h, shade_colour(g_colour_background, 5));
-
 		if (cScrollBar.visible) {
 			this.cursor.draw(gr, this.x, this.cursory, 200);
 		}
@@ -130,11 +132,22 @@ function oScrollbar(parent) {
 		}
 	}
 
-	this.on_mouse = function (event, x, y, delta) {
-		this.isHover = x >= this.x && x <= this.x + this.w && y >= this.y && y <= this.y + this.h;
-		this.isHoverCursor = x >= this.x && x <= this.x + this.w && y >= this.cursory && y <= this.cursory + this.cursorh;
-		this.isHoverEmptyArea = this.isHover && !this.isHoverCursor;
+	this._isHover = function (x, y) {
+		return x >= this.x && x <= this.x + this.w && y >= this.y && y <= this.y + this.h;
+	}
 
+	this._isHoverCursor = function (x, y) {
+		return x >= this.x && x <= this.x + this.w && y >= this.cursory && y <= this.cursory + this.cursorh;
+	}
+
+	this._isHoverEmptyArea = function (x, y) {
+		return this.isHover && !this.isHoverCursor;
+	}
+
+	this.on_mouse = function (event, x, y, delta) {
+		this.isHover = this._isHover(x, y);
+		this.isHoverCursor = this._isHoverCursor(x, y);
+		this.isHoverEmptyArea = this._isHoverEmptyArea(x, y);
 		var scroll_step_page = parent.h;
 
 		switch (event) {
