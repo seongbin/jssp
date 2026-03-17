@@ -106,7 +106,7 @@ function get_images() {
 
 	images.play_hover = utils.CreateImage(size, size);
 	gb = images.play_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, size, size, true, setAlpha(g_colour_text, 16));
+	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(char, font_hover, colour_hover, 0, 0, size, size, 2, 2);
 	images.play_hover.ReleaseGraphics();
 
@@ -118,7 +118,7 @@ function get_images() {
 
 	images.prev_hover = utils.CreateImage(size, size);
 	gb = images.prev_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, size, size, true, setAlpha(g_colour_text, 16));
+	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(chars.prev, font_hover, colour_hover, 0, 0, size, size, 2, 2);
 	images.prev_hover.ReleaseGraphics();
 
@@ -130,7 +130,7 @@ function get_images() {
 
 	images.next_hover = utils.CreateImage(size, size);
 	gb = images.next_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, size, size, true, setAlpha(g_colour_text, 16));
+	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(chars.next, font_hover, colour_hover, 0, 0, size, size, 2, 2);
 	images.next_hover.ReleaseGraphics();
 
@@ -145,7 +145,7 @@ function get_images() {
 
 	images.pord_hover = utils.CreateImage(size, size);
 	gb = images.pord_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, size, size, true, setAlpha(g_colour_text, 16));
+	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(pord_char, font_hover, pord !== 1 ? g_colour_highlight : colour_hover, 0, 0, size, size, 2, 2);
 	images.pord_hover.ReleaseGraphics();
 
@@ -159,7 +159,7 @@ function get_images() {
 	gb = images.mode_hover.GetGraphics();
 	if (window.IsDefaultUI) {
 	} else {
-		fillRectangle(gb, 0, 0, size, size, true, setAlpha(g_colour_text, 16));
+		fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
 	}
 	gb.WriteTextSimple(window.IsDark ? chars.light : chars.dark, window.IsDefaultUI ? font_normal : font_hover, window.IsDefaultUI ? colour_block : colour_hover, 0, 0, size, size, 2, 2);
 	images.mode_hover.ReleaseGraphics();
@@ -171,19 +171,19 @@ function get_images() {
 
 	images.add_folder_normal = utils.CreateImage(add_folder_width, bh);
 	gb = images.add_folder_normal.GetGraphics();
-	fillRectangle(gb, 0, 0, add_folder_width, bh, true, setAlpha(g_colour_text, 16));
+	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(add_folder_text, g_font, g_colour_text, 0, 0, add_folder_width, bh, 2, 2);
 	images.add_folder_normal.ReleaseGraphics();
 
 	images.add_folder_hover = utils.CreateImage(add_folder_width, bh);
 	gb = images.add_folder_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, add_folder_width, bh, true, setAlpha(g_colour_text, 32));
+	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 32));
 	gb.WriteTextSimple(add_folder_text, g_font, g_colour_text, 0, 0, add_folder_width, bh, 2, 2);
 	images.add_folder_hover.ReleaseGraphics();
 
 	images.add_folder_down = utils.CreateImage(add_folder_width, bh);
 	gb = images.add_folder_down.GetGraphics();
-	fillRectangle(gb, 0, 0, add_folder_width, bh, true, setAlpha(g_colour_text, 48));
+	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 48));
 	gb.WriteTextSimple(add_folder_text, g_font, g_colour_text, 0, 0, add_folder_width, bh, 2, 2);
 	images.add_folder_down.ReleaseGraphics();
 
@@ -193,19 +193,19 @@ function get_images() {
 
 	images.edit_query_normal = utils.CreateImage(edit_query_width, bh);
 	gb = images.edit_query_normal.GetGraphics();
-	fillRectangle(gb, 0, 0, edit_query_width, bh, true, setAlpha(g_colour_text, 16));
+	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(edit_query_text, g_font, g_colour_text, 0, 0, edit_query_width, bh, 2, 2);
 	images.edit_query_normal.ReleaseGraphics();
 
 	images.edit_query_hover = utils.CreateImage(edit_query_width, bh);
 	gb = images.edit_query_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, edit_query_width, bh, true, setAlpha(g_colour_text, 32));
+	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 32));
 	gb.WriteTextSimple(edit_query_text, g_font, g_colour_text, 0, 0, edit_query_width, bh, 2, 2);
 	images.edit_query_hover.ReleaseGraphics();
 
 	images.edit_query_down = utils.CreateImage(edit_query_width, bh);
 	gb = images.edit_query_down.GetGraphics();
-	fillRectangle(gb, 0, 0, edit_query_width, bh, true, setAlpha(g_colour_text, 48));
+	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 48));
 	gb.WriteTextSimple(edit_query_text, g_font, g_colour_text, 0, 0, edit_query_width, bh, 2, 2);
 	images.edit_query_down.ReleaseGraphics();
 
@@ -664,6 +664,7 @@ var images = {
 var ppt = {
 	enableDynamicColours : window.GetProperty("SMOOTH.DYNAMIC.COLOURS.ENABLED", false),
 	enableCustomColours: window.GetProperty("SMOOTH.CUSTOM.COLOURS.ENABLED", false),
+	enableRoundedCorner: window.GetProperty("SMOOTH.ROUNDED.CORNER.ENABLED", true),
 	wallpapermode: window.GetProperty("SMOOTH.WALLPAPER.MODE", 0), // 0 none, 1 front cover 2 custom image
 	wallpaperblurred: window.GetProperty("SMOOTH.WALLPAPER.BLURRED", false),
 	wallpaperblur: window.GetProperty("SMOOTH.WALLPAPER.BLUR", 150),
@@ -683,6 +684,8 @@ utils.CreateFolder(CACHE_FOLDER);
 chars.add_folder = "\ue2cc";
 chars.edit_query = "\ue3c9";
 chars.close = "\ue14c";
+chars.disc = "\ue019",
+chars.label = "\ue937",
 chars.search = "\ue8b6";
 chars.dark = "\ue51c";
 chars.light = "\ue518";

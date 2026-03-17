@@ -18,17 +18,29 @@ function oScrollbar(parent) {
 
 		this.cursorImage_normal = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_normal.GetGraphics();
-		gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 50));
+		if (ppt.enableRoundedCorner) {
+			gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 50));
+		} else {
+			fillRectangle(gb, this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, false, setAlpha(g_colour_text, 50));
+		}
 		this.cursorImage_normal.ReleaseGraphics();
 
 		this.cursorImage_hover = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_hover.GetGraphics();
-		gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 100));
+		if (ppt.enableRoundedCorner) {
+			gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 100));
+		} else {
+			fillRectangle(gb, this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, false, setAlpha(g_colour_text, 100));
+		}
 		this.cursorImage_hover.ReleaseGraphics();
 
 		this.cursorImage_down = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_down.GetGraphics();
-		gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 150));
+		if (ppt.enableRoundedCorner) {
+			gb.FillRoundedRectangle(this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, this.cursorw * 0.25, this.cursorw * 0.25, setAlpha(g_colour_text, 150));
+		} else {
+			fillRectangle(gb, this.cursorw * 0.25, 0, this.cursorw * 0.5, this.cursorh, false, setAlpha(g_colour_text, 150));
+		}
 		this.cursorImage_down.ReleaseGraphics();
 
 		this.cursor = new button(this.cursorImage_normal, this.cursorImage_hover, this.cursorImage_down);
