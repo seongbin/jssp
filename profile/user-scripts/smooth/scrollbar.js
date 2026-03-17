@@ -84,7 +84,7 @@ function oScrollbar(parent) {
 
 	this.setSize = function () {
 		this.w = cScrollBar.width;
-		this.x = ww - this.w;
+		this.x = parent.x + parent.w;
 		this.y = parent.y;
 		this.h = parent.h;
 	}
@@ -133,11 +133,11 @@ function oScrollbar(parent) {
 	}
 
 	this._isHover = function (x, y) {
-		return x >= this.x && x <= this.x + this.w && y >= this.y && y <= this.y + this.h;
+		return x > this.x && x < this.x + this.w && y > this.y && y < this.y + this.h;
 	}
 
 	this._isHoverCursor = function (x, y) {
-		return x >= this.x && x <= this.x + this.w && y >= this.cursory && y <= this.cursory + this.cursorh;
+		return x > this.x && x < this.x + this.w && y > this.cursory && y < this.cursory + this.cursorh;
 	}
 
 	this._isHoverEmptyArea = function (x, y) {

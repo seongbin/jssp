@@ -148,7 +148,7 @@ function oInputbox(live_update, default_text, empty_text, func, parent) {
 	}
 
 	this.check = function (callback, x, y) {
-		this.hover = x >= this.x - 2 && x <= this.x + this.w + 1 && y > this.y && y < this.y + this.h;
+		this.hover = x >= this.x && x <= this.x + this.w && y > this.y && y < this.y + this.h;
 		switch (callback) {
 		case "lbtn_down":
 			if (this.hover) {

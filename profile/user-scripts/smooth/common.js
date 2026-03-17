@@ -96,18 +96,40 @@ function get_images() {
 	gb.WriteTextSimple(chars.close, font, colour_hover, 0, 0, size, size, 2, 2);
 	images.reset_hover.ReleaseGraphics();
 
+	// delete
+	images.delete_normal = utils.CreateImage(size, size);
+	gb = images.delete_normal.GetGraphics();
+	gb.WriteTextSimple(chars.close, font, colour_normal, 0, 0, size, size, 2, 2);
+	images.delete_normal.ReleaseGraphics();
+
+	images.delete_hover = utils.CreateImage(size, size);
+	gb = images.delete_hover.GetGraphics();
+	gb.WriteTextSimple(chars.close, font, colour_hover, 0, 0, size, size, 2, 2);
+	images.delete_hover.ReleaseGraphics();
+
 	// play
-	var char = fb.IsPlaying ? !fb.IsPlaying || fb.IsPaused ? chars.play : chars.pause : chars.stop;
 	images.play_normal = utils.CreateImage(size, size);
 	gb = images.play_normal.GetGraphics();
-	gb.WriteTextSimple(char, font, colour_normal, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(chars.play, font, colour_normal, 0, 0, size, size, 2, 2);
 	images.play_normal.ReleaseGraphics();
 
 	images.play_hover = utils.CreateImage(size, size);
 	gb = images.play_hover.GetGraphics();
+	gb.WriteTextSimple(chars.play, font, colour_hover, 0, 0, size, size, 2, 2);
+	images.play_hover.ReleaseGraphics();
+
+	// playorpause
+	var char = fb.IsPlaying ? !fb.IsPlaying || fb.IsPaused ? chars.play : chars.pause : chars.stop;
+	images.porp_normal = utils.CreateImage(size, size);
+	gb = images.porp_normal.GetGraphics();
+	gb.WriteTextSimple(char, font, colour_normal, 0, 0, size, size, 2, 2);
+	images.porp_normal.ReleaseGraphics();
+
+	images.porp_hover = utils.CreateImage(size, size);
+	gb = images.porp_hover.GetGraphics();
 	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(char, font, colour_hover, 0, 0, size, size, 2, 2);
-	images.play_hover.ReleaseGraphics();
+	images.porp_hover.ReleaseGraphics();
 
 	// prev
 	images.prev_normal = utils.CreateImage(size, size);
@@ -207,6 +229,50 @@ function get_images() {
 	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedStyle, setAlpha(g_colour_text, 48));
 	gb.WriteTextSimple(edit_query_text, g_font, g_colour_text, 0, 0, edit_query_width, bh, 2, 2);
 	images.edit_query_down.ReleaseGraphics();
+
+	// playlists
+	var playlists_text = "Playlists";
+	var playlists_width = playlists_text.calc_width2(g_font_small) + M * 1.5;
+
+	images.playlists_normal = utils.CreateImage(playlists_width, bh);
+	gb = images.playlists_normal.GetGraphics();
+	gb.FillRoundedRectangle(0, 0, playlists_width, bh, bh * 0.5, bh * 0.5, !ppt.enableHistoryMode ? g_colour_text : blendColours(g_colour_text, g_colour_background, 0.9));
+	gb.WriteTextSimple(playlists_text, g_font_small, !ppt.enableHistoryMode ? DetermineTextColour(g_colour_text) : g_colour_text, 0, 0, playlists_width, bh, 2, 2);
+	images.playlists_normal.ReleaseGraphics();
+
+	images.playlists_hover = utils.CreateImage(playlists_width, bh);
+	gb = images.playlists_hover.GetGraphics();
+	gb.FillRoundedRectangle(0, 0, playlists_width, bh, bh * 0.5, bh * 0.5, !ppt.enableHistoryMode ? blendColours(g_colour_text, g_colour_background, 0.1) : blendColours(g_colour_text, g_colour_background, 0.8));
+	gb.WriteTextSimple(playlists_text, g_font_small, !ppt.enableHistoryMode ? DetermineTextColour(g_colour_text) : g_colour_text, 0, 0, playlists_width, bh, 2, 2);
+	images.playlists_hover.ReleaseGraphics();
+
+	images.playlists_down = utils.CreateImage(playlists_width, bh);
+	gb = images.playlists_down.GetGraphics();
+	gb.FillRoundedRectangle(0, 0, playlists_width, bh, bh * 0.5, bh * 0.5, !ppt.enableHistoryMode ? blendColours(g_colour_text, g_colour_background, 0.2) : g_colour_text);
+	gb.WriteTextSimple(playlists_text, g_font_small, DetermineTextColour(g_colour_text), 0, 0, playlists_width, bh, 2, 2);
+	images.playlists_down.ReleaseGraphics();
+
+	// history
+	var history_text = "History";
+	var history_width = history_text.calc_width2(g_font_small) + M * 1.5;
+
+	images.history_normal = utils.CreateImage(history_width, bh);
+	gb = images.history_normal.GetGraphics();
+	gb.FillRoundedRectangle(0, 0, history_width, bh, bh * 0.5, bh * 0.5, ppt.enableHistoryMode ? g_colour_text : blendColours(g_colour_text, g_colour_background, 0.9));
+	gb.WriteTextSimple(history_text, g_font_small, ppt.enableHistoryMode ? DetermineTextColour(g_colour_text) : g_colour_text, 0, 0, history_width, bh, 2, 2);
+	images.history_normal.ReleaseGraphics();
+
+	images.history_hover = utils.CreateImage(history_width, bh);
+	gb = images.history_hover.GetGraphics();
+	gb.FillRoundedRectangle(0, 0, history_width, bh, bh * 0.5, bh * 0.5, ppt.enableHistoryMode ? blendColours(g_colour_text, g_colour_background, 0.1) : blendColours(g_colour_text, g_colour_background, 0.8));
+	gb.WriteTextSimple(history_text, g_font_small, ppt.enableHistoryMode ? DetermineTextColour(g_colour_text) : g_colour_text, 0, 0, history_width, bh, 2, 2);
+	images.history_hover.ReleaseGraphics();
+
+	images.history_down = utils.CreateImage(history_width, bh);
+	gb = images.history_down.GetGraphics();
+	gb.FillRoundedRectangle(0, 0, history_width, bh, bh * 0.5, bh * 0.5, ppt.enableHistoryMode ? blendColours(g_colour_text, g_colour_background, 0.2) : g_colour_text);
+	gb.WriteTextSimple(history_text, g_font_small, DetermineTextColour(g_colour_text), 0, 0, history_width, bh, 2, 2);
+	images.history_down.ReleaseGraphics();
 
 	// force re-creation of buttons with new colours
 	if (typeof brw == 'object') brw.setSize();
@@ -506,6 +572,7 @@ function get_font() {
 
 	g_font = smooth_font(name, size);
 	g_font_bold = smooth_font(name, size, DWRITE_FONT_WEIGHT_BOLD);
+	g_font_small = smooth_font(name, size - 1, DWRITE_FONT_WEIGHT_BOLD);
 	g_font_fixed = smooth_font(utils.CheckFont("Google Sans Code") ? "Google Sans Code" : "Consolas", size);
 	g_font_group1 = smooth_font(name, size + 6, DWRITE_FONT_WEIGHT_BOLD);
 	g_font_group2 = smooth_font(name, size + 2, DWRITE_FONT_WEIGHT_BOLD);
@@ -665,6 +732,8 @@ var ppt = {
 	enableColoursDynamic : window.GetProperty("SMOOTH.COLOURS.DYNAMIC.ENABLED", false),
 	enableColoursCustom: window.GetProperty("SMOOTH.COLOURS.CUSTOM.ENABLED", false),
 	enableRoundedStyle: window.GetProperty("SMOOTH.ROUNDED.STYLE.ENABLED", true),
+	enableHistoryMode: window.GetProperty("SMOOTH.HISTORY.MODE.ENABLED", false),
+	enableLeftPane: window.GetProperty("SMOOTH.LEFT.PANE.ENABLED", false),
 	wallpapermode: window.GetProperty("SMOOTH.WALLPAPER.MODE", 0), // 0 none, 1 front cover 2 custom image
 	wallpaperblurred: window.GetProperty("SMOOTH.WALLPAPER.BLURRED", false),
 	wallpaperblur: window.GetProperty("SMOOTH.WALLPAPER.BLUR", 150),
@@ -685,6 +754,7 @@ chars.add_folder = "\ue2cc";
 chars.edit_query = "\ue3c9";
 chars.close = "\ue14c";
 chars.disc = "\ue019",
+chars.menu = "\ue5d2",
 chars.search = "\ue8b6";
 chars.dark = "\ue51c";
 chars.light = "\ue518";
