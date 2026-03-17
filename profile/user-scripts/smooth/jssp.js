@@ -52,6 +52,7 @@ function on_item_focus_change(playlist, from, to) {
 
 	if (playlist == g_active_playlist) {
 		g_focus_row = brw.getOffsetFocusItem(g_focus_id);
+
 		if (g_focus_row < scroll / ppt.rowHeight || g_focus_row > scroll / ppt.rowHeight + brw.totalRowsVis - 0.1) {
 			var old = scroll;
 			scroll = (g_focus_row - Math.floor(brw.totalRowsVis / 2)) * ppt.rowHeight;
@@ -507,22 +508,42 @@ function oBrowser() {
 
 		for (var i = 0; i < this.groups.length; i++) {
 			var s = this.groups[i].start;
+			var group = this.groups[i];
 
-			if (ppt.enableGroupHeader) {
-				this.groups[i].rowId = r;
+			var show_group_header = ppt.enableGroupHeader;
+			if (group.totaldiscs > 1 && group.discnumber > 1) {
+				for (var g = 0; g < i; g++) {
+					if (this.groups[g].album == group.album && this.groups[g].discnumber == 1) {
+						show_group_header = false;
+						break;
+					}
+				}
+			}
+
+			if (show_group_header) {
+				group.rowId = r;
 				for (var k = 0; k < ppt.groupHeaderRowsNumber; k++) {
 					this.rows[r] = new Object();
 					this.rows[r].type = k + 1;
-					this.rows[r].metadb = this.groups[i].metadb;
+					this.rows[r].metadb = group.metadb;
 					this.rows[r].albumId = i;
 					this.rows[r].albumTrackId = 0;
 					this.rows[r].playlistTrackId = s;
-					// this.rows[r].groupkey = this.groups[i].groupkey;
 					r++;
 				}
 			}
 
-			var m = this.groups[i].count;
+			if (group.totaldiscs > 1 && ppt.enableGroupHeader) {
+				this.rows[r] = new Object();
+				this.rows[r].type = -1; // disc header row
+				this.rows[r].metadb = group.metadb;
+				this.rows[r].albumId = i;
+				this.rows[r].albumTrackId = -1;
+				this.rows[r].playlistTrackId = s;
+				r++;
+			}
+
+			var m = group.count;
 			for (var j = 0; j < m; j++) {
 				this.rows[r] = new Object();
 				this.rows[r].type = 0;
@@ -531,7 +552,6 @@ function oBrowser() {
 				this.rows[r].albumId = i;
 				this.rows[r].albumTrackId = j;
 				this.rows[r].playlistTrackId = s + j;
-				// this.rows[r].groupkey = this.groups[i].groupkey;
 				r++;
 			}
 		}
@@ -758,6 +778,11 @@ function oBrowser() {
 					}
 
 					break;
+				case -1:
+					var disc_group = this.groups[this.rows[i].albumId];
+					var disc_text = "Disc " + disc_group.discnumber + " / " + disc_group.totaldiscs;
+					gr.WriteTextSimple(disc_text, g_font, g_colour_highlight, ax + M, ay, aw - M * 2, ah, 0, 2, 1, 1);
+					break;
 				case 0:
 					// odd/even background
 					if (ppt.enableRowStripe) {
@@ -813,7 +838,7 @@ function oBrowser() {
 
 					// length part
 					lw = "00:00:00".calc_width2(g_font);
-					gr.WriteTextSimple(is_playing ? g_time : tags.length, g_font, col1, ax + aw - lw - M, ay, lw, ah, 1, 2, 1, 1);
+					gr.WriteTextSimple(is_playing ? g_time : tags.length, g_font, col2, ax + aw - lw - M, ay, lw, ah, 1, 2, 1, 1);
 
 					// rating part
 					rw = foo_playcount ? g_rating_width : 0;
@@ -835,7 +860,7 @@ function oBrowser() {
 						}
 					} else {
 						if (ppt.enableGroupHeader) {
-							var w1 = (tags.track_artist === "") ? (mid_width - M) : Math.min((mid_width - M) * 0.75, tags.title.calc_width2(g_font) + 1); // pixel hack +1 to prevent text cutoff when title width is almost equal to w1
+							var w1 = (tags.track_artist === "") ? (mid_width - M) : Math.min((mid_width - M) * 0.75, tags.title.calc_width2(g_font) + 0.1); // pixel hack +0.1 to prevent text cutoff when title width is almost equal to w1
 							var track_artist_x = ax + tnw + w1;
 							var w2 = mid_width - M - w1;
 							gr.WriteTextSimple(tags.title, g_font, col1, ax + tnw, ay, w1, ah, 0, 2, 1, 1);
@@ -869,7 +894,7 @@ function oBrowser() {
 		this.drawHeaderBar(gr);
 
 		// bottombar part
-		this.drawbottomBar(gr);
+		this.drawBottomBar(gr);
 	}
 
 	this.drawHeaderBar = function (gr) {
@@ -911,18 +936,45 @@ function oBrowser() {
 		this.btn_play.draw(gr, x - w * 5, y);
 	}
 
-	this.drawbottomBar = function (gr) {
+	this.drawBottomBar = function (gr) {
 		fillRectangle(gr, this.bx, this.by, this.bw, this.bh, false, !ppt.enableDynamicColours ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background);
 		gr.FillRectangle(this.bx, this.by, this.bw, 1, shade_colour(g_colour_background, 10));
 	}
 
 	this.selectGroupTracks = function (aId) {
 		var affectedItems = [];
-		var end = this.groups[aId].start + this.groups[aId].count;
-		for (var i = this.groups[aId].start; i < end; i++) {
+		var group = this.groups[aId];
+		if (!group) {
+			return;
+		}
+		var end = group.start + group.count;
+		for (var i = group.start; i < end; i++) {
 			affectedItems.push(i);
 		}
 		plman.SetPlaylistSelection(g_active_playlist, affectedItems, true);
+	}
+
+	this.selectAlbumTracks = function (aId) {
+		var group = this.groups[aId];
+		if (!group) {
+			return;
+		}
+		var album = group.album;
+		var affectedItems = [];
+
+		for (var g = 0; g < this.groups.length; g++) {
+			var grp = this.groups[g];
+			if (grp.album == album) {
+				var end = grp.start + grp.count;
+				for (var i = grp.start; i < end; i++) {
+					affectedItems.push(i);
+				}
+			}
+		}
+
+		if (affectedItems.length) {
+			plman.SetPlaylistSelection(g_active_playlist, affectedItems, true);
+		}
 	}
 
 	this.showNowPlaying = function () {
@@ -1005,11 +1057,15 @@ function oBrowser() {
 							}
 						}
 						break;
-					default: // ----------------> group header row
+					default: // ----------------> group or disc header row
 						if (!ctrl) {
 							plman.ClearPlaylistSelection(g_active_playlist);
 						}
-						this.selectGroupTracks(this.rows[this.activeRow].albumId);
+						if (rowType == -1) {
+							this.selectGroupTracks(this.rows[this.activeRow].albumId);
+						} else {
+							this.selectAlbumTracks(this.rows[this.activeRow].albumId);
+						}
 						plman.SetPlaylistFocusItem(g_active_playlist, playlistTrackId);
 						break;
 					}
@@ -1123,10 +1179,14 @@ function oBrowser() {
 							plman.SetPlaylistFocusItem(g_active_playlist, playlistTrackId);
 						}
 						break;
-					default: // ----------------> group header row
+					default: // ----------------> group or disc header row
 						if (!plman.IsPlaylistItemSelected(g_active_playlist, playlistTrackId)) {
 							plman.ClearPlaylistSelection(g_active_playlist);
-							this.selectGroupTracks(this.rows[this.activeRow].albumId);
+							if (rowType == -1) {
+								this.selectGroupTracks(this.rows[this.activeRow].albumId);
+							} else {
+								this.selectAlbumTracks(this.rows[this.activeRow].albumId);
+							}
 							plman.SetPlaylistFocusItem(g_active_playlist, playlistTrackId);
 						}
 						is_group_header = true;
@@ -1463,11 +1523,13 @@ function oGroup(index, start, handle, groupkey, cachekey) {
 	this.image_requested = false;
 
 	var arr = this.groupkey.split(" ^^ ");
-	this.album = arr[0] + arr[1] || "";
-	this.artist = arr[2] || "";
-	this.date = format_date(arr[3].slice(0, 10)) || "";
-	this.copyright = arr[4] || ""; // copyright/url/genre
-	this.totaltracks = arr[5] || "";
+	this.album = arr[0];
+	this.artist = arr[1];
+	this.date = format_date(arr[2].slice(0, 10));
+	this.copyright = arr[3]; // copyright/url/genre
+	this.totaltracks = arr[4];
+	this.discnumber = parseInt(arr[5], 10);
+	this.totaldiscs = parseInt(arr[6], 10);
 	this.groupkey = null; // freed after parsing
 
 	this.finalise = function (count, total_time_length) {
@@ -1646,7 +1708,7 @@ ppt.enableRowStripe = window.GetProperty("SMOOTH.ROW.STRIPE.ENABLED", true);
 
 ppt.time_tf = "$if3(-%playback_time_remaining%,%playback_time%,)";
 ppt.track_tf = "$if2([%artist%],N/A) ^^ [%title%] ^^ [%genre%] ^^ [%album%] ^^ $if2($num([%tracknumber%],1),00) ^^ [%length%] ^^ $if2(%rating%,0) ^^ [%play_count%] ^^ [%added%] ^^ [%track artist%]";
-ppt.groupkey_tf = "$if2(%album%,$if(%length%,'('Singles')',%title%)) ^^ $ifgreater(%totaldiscs%,1,[ - Disc %discnumber%],) ^^ $if2(%album artist%,$if(%length%,%directory%,N/A)) ^^ $if2([%date%],N/A) ^^ $if3([%copyright%],[%url%],[%genre%]) ^^ $num([%totaltracks%],1)";
+ppt.groupkey_tf = "$if2(%album%,$if(%length%,'('Singles')',%title%)) ^^ $if2(%album artist%,$if(%length%,%directory%,N/A)) ^^ $if2([%date%],N/A) ^^ $if3([%copyright%],[%url%],[%genre%]) ^^ $num([%totaltracks%],1) ^^ $if2(%discnumber%,1) ^^ $if2(%totaldiscs%,1)";
 
 var tfo = {
 	time: fb.TitleFormat(ppt.time_tf),

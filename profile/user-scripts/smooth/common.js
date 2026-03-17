@@ -82,8 +82,9 @@ function get_images() {
 	var size = M * 2;
 	var font_normal = smooth_font("Material Icons", size * 0.20);
 	var font_hover = smooth_font("Material Icons", size * 0.25);
-	var colour_normal = setAlpha(g_colour_text, 100);
+	var colour_normal = setAlpha(g_colour_text, 150);
 	var colour_hover = g_colour_text;
+	var colour_block = window.IsDark ? shade_colour(g_colour_text, 80) : tint_colour(g_colour_text, 80);
 
 	// reset
 	images.reset_normal = utils.CreateImage(size, size);
@@ -151,13 +152,16 @@ function get_images() {
 	// dark/light mode in CUI
 	images.mode_normal = utils.CreateImage(size, size);
 	gb = images.mode_normal.GetGraphics();
-	gb.WriteTextSimple(window.IsDark ? chars.light : chars.dark, font_normal, window.IsDefaultUI ? setAlpha(g_colour_text, 50) : colour_normal, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(window.IsDark ? chars.light : chars.dark, font_normal, window.IsDefaultUI ? colour_block : colour_normal, 0, 0, size, size, 2, 2);
 	images.mode_normal.ReleaseGraphics();
 
 	images.mode_hover = utils.CreateImage(size, size);
 	gb = images.mode_hover.GetGraphics();
-	!window.IsDefaultUI && fillRectangle(gb, 0, 0, size, size, true, setAlpha(g_colour_text, 16));
-	gb.WriteTextSimple(window.IsDark ? chars.light : chars.dark, window.IsDefaultUI ? font_normal : font_hover, window.IsDefaultUI ? setAlpha(g_colour_text, 50) : colour_hover, 0, 0, size, size, 2, 2);
+	if (window.IsDefaultUI) {
+	} else {
+		fillRectangle(gb, 0, 0, size, size, true, setAlpha(g_colour_text, 16));
+	}
+	gb.WriteTextSimple(window.IsDark ? chars.light : chars.dark, window.IsDefaultUI ? font_normal : font_hover, window.IsDefaultUI ? colour_block : colour_hover, 0, 0, size, size, 2, 2);
 	images.mode_hover.ReleaseGraphics();
 
 	// add folder in empty normal playlist
