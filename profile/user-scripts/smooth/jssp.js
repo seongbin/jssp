@@ -223,6 +223,11 @@ function on_key_down(vkey) {
 				fb.RunMainMenuCommand("Edit/Select all");
 				brw.repaint();
 				break;
+			case 66: // CTRL+B
+				ppt.enableGroupBackground = !ppt.enableGroupBackground;
+				window.SetProperty("SMOOTH.GROUP.BACKGROUND.ENABLED", ppt.enableGroupBackground);
+				brw.repaint();
+				break;
 			case 67: // CTRL+C
 				var items = plman.GetPlaylistSelectedItems(g_active_playlist);
 				items.CopyToClipboard();
@@ -234,7 +239,6 @@ function on_key_down(vkey) {
 				get_metrics();
 				brw.repaint();
 				brw.showNowPlaying();
-				break;
 				break;
 			case 69: // CTRL+E
 				ppt.enableRowStripe = !ppt.enableRowStripe;
@@ -248,6 +252,13 @@ function on_key_down(vkey) {
 				get_metrics();
 				brw.repaint();
 				brw.showNowPlaying();
+				break;
+			case 82: // CTRL+R
+				ppt.enableRoundedStyle = !ppt.enableRoundedStyle;
+				window.SetProperty("SMOOTH.ROUNDED.STYLE.ENABLED", ppt.enableRoundedStyle);
+				get_images();
+				brw.scrollbar.setCursorButton();
+				brw.repaint();
 				break;
 			case 86: // CTRL+V
 				if (playlist_can_add_items(g_active_playlist) && fb.CheckClipboardContents()) {
@@ -349,7 +360,7 @@ function on_playback_dynamic_info_track(type) {
 			setWallpaperImg();
 		}
 
-		if (ppt.enableDynamicColours) {
+		if (ppt.enableColoursDynamic) {
 			on_colours_changed();
 		}
 	}
@@ -361,7 +372,7 @@ function on_playback_new_track() {
 	g_time = tfo.time.Eval();
 	setWallpaperImg();
 
-	if (ppt.enableDynamicColours) {
+	if (ppt.enableColoursDynamic) {
 		on_colours_changed();
 	}
 
@@ -385,7 +396,7 @@ function on_playback_stop(reason) {
 	if (reason != 2) {
 		setWallpaperImg();
 
-		if (ppt.enableDynamicColours) {
+		if (ppt.enableColoursDynamic) {
 			on_colours_changed();
 		}
 	}
@@ -799,6 +810,9 @@ function oBrowser() {
 					var group_length = group.total_group_duration_txt;
 					var group_height = ah * ppt.groupHeaderRowsNumber;
 
+					// hovered group
+					this.is_hover_group = m_x > ax && m_x < ax + aw && m_y > ay && m_y < ay + group_height && m_y < this.y + this.h;
+
 					// group cover
 					if (!group.cover_image && !group.image_requested) {
 						group.image_requested = true;
@@ -809,17 +823,20 @@ function oBrowser() {
 						if (ppt.enableGroupBackground && !group.dominant) {
 							group.dominant = get_dominant_colour(group.cover_image, group.cachekey);
 						}
-						if (group.dominant) {
+						if (ppt.enableGroupBackground && group.dominant) {
 							var background = window.IsDark ? shade_colour(group.dominant, 5) : tint_colour(group.dominant, 5);
 							normal_text = DetermineTextColour(background);
 							fader_text = blendColours(background, normal_text, 0.45);
-							fillRectangle(gr, ax, ay, aw, group_height, ppt.enableRoundedCorner, background);
+							fillRectangle(gr, ax, ay, aw, group_height, ppt.enableRoundedStyle, background);
+							drawRectangle(gr, ax, ay, aw, group_height, ppt.enableRoundedStyle, setAlpha(normal_text, 16));
 						} else {
-							drawRectangle(gr, ax, ay, aw, group_height, ppt.enableRoundedCorner, setAlpha(normal_text, 32));
+							if (!ppt.enableColoursDynamic) {
+								fillRectangle(gr, ax, ay, aw, group_height, ppt.enableRoundedStyle, shade_colour(g_colour_background, 10));
+							}
 						}
-						drawImage(gr, group.cover_image, ax + M, ay + M, group_height - M * 2, group_height - M * 2, false, 1.0, setAlpha(normal_text, 48), ppt.enableRoundedCorner);
+						drawImage(gr, group.cover_image, ax + M, ay + M, group_height - M * 2, group_height - M * 2, false, 1.0, setAlpha(normal_text, 48), ppt.enableRoundedStyle);
 					} else {
-						fillRectangle(gr, ax + M, ay + M, group_height - M * 2, group_height - M * 2, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
+						fillRectangle(gr, ax + M, ay + M, group_height - M * 2, group_height - M * 2, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
 						gr.WriteTextSimple(this.rows[i].metadb.Length ? "NO\nCOVER" : "WEB\nRADIOS", g_font_bold, fader_text, ax + M, ay + M, group_height - M * 2, group_height - M * 2, 2, 2, 1, 1);
 					}
 
@@ -865,7 +882,7 @@ function oBrowser() {
 					if (firstTrackIdx !== -1 && ppt.enableRowStripe) {
 						var sub_ay = Math.floor(this.y + (firstTrackIdx * ah) - scroll_);
 						var sub_ah = (lastTrackIdx - firstTrackIdx + 1) * ah;
-						fillRectangle(gr, ax, sub_ay, aw, sub_ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, 8));
+						fillRectangle(gr, ax, sub_ay, aw, sub_ah, ppt.enableRoundedStyle, setAlpha(g_colour_text, 8));
 					}
 
 					gr.WriteTextSimple(subgroup_text, g_font, setAlpha(g_colour_text, 150), ax, ay, aw, ah, 0, 2, 1, 1);
@@ -875,7 +892,7 @@ function oBrowser() {
 					var dash_width = scale(2);
 					var dash_gap = dash_width * 3;
 					for (var k = 0; k < subgroup_text_width; k += dash_gap) {
-						gr.FillRectangle(ax + M + k, ay + ah - 1, dash_width, 1, fader_text);
+						gr.FillRectangle(ax + k, ay + ah - 1, dash_width, 1, fader_text);
 					}
 					*/
 					break;
@@ -891,7 +908,7 @@ function oBrowser() {
 					}
 					if (ppt.enableRowStripe && !rowAlbumHasSubgroup) {
 						if (ppt.enableGroupHeader ? this.rows[i].albumTrackId % 2 != 0 : i % 2 == 0) {
-							fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, window.IsDark ? 4 : 8));
+							fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedStyle, setAlpha(g_colour_text, window.IsDark ? 4 : 8));
 						}
 					}
 
@@ -911,35 +928,34 @@ function oBrowser() {
 
 					if (is_playing) {
 						this.nowplaying_y = ay;
-						fillRectangle(gr, ax, ay, aw * fb.PlaybackTime / fb.PlaybackLength, ah, ppt.enableRoundedCorner, setAlpha(g_colour_highlight, 48));
+						fillRectangle(gr, ax, ay, aw * fb.PlaybackTime / fb.PlaybackLength, ah, ppt.enableRoundedStyle, setAlpha(g_colour_highlight, 48));
 					}
 
 					if (is_selected) {
-						// fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, 24));
+						// fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedStyle, setAlpha(g_colour_text, 24));
 					}
 
 					if (is_focused) {
-						// drawRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedCorner, setAlpha(g_colour_selection, 200));
+						// drawRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedStyle, setAlpha(g_colour_selection, 200));
 					}
 
 					// hovered row
-					this.ishover_track = this.mx > ax && this.mx < ax + aw && this.my > ay && this.my < ay + ah && this.my < this.y + this.h;
-					if (this.ishover_track) {
-						fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
+					this.is_hover_track = m_x > ax && m_x < ax + aw && m_y > ay && m_y < ay + ah && m_y < this.y + this.h;
+					if (this.is_hover_track) {
+						fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
 					}
 
 					// tracknumber part
 					tnw = (ppt.enableGroupHeader ? "99".calc_width2(g_font) : Math.min(this.rows.length.toString().calc_width2(g_font), ah)) + M * 2;
-					var tracknum_x = ax;
 					if (is_selected) {
-						gr.WriteTextSimple(chars.check, g_font_material, g_colour_highlight, tracknum_x, ay, tnw, ah, 2, 2, 1, 1);
+						gr.WriteTextSimple(chars.check, g_font_material, g_colour_highlight, ax, ay, tnw, ah, 2, 2, 1, 1);
 					} else if (is_playing) {
 						this.nowplaying_y = ay;
-						gr.WriteTextSimple(g_seconds % 2 == 0 ? chars.volume0 : chars.volume1, g_font_material, g_colour_highlight, tracknum_x, ay, tnw, ah, 2, 2, 1, 1);
+						gr.WriteTextSimple(g_seconds % 2 == 0 ? chars.volume0 : chars.volume1, g_font_material, g_colour_highlight, ax, ay, tnw, ah, 2, 2, 1, 1);
 					} else if (is_recently_added(tags.added)) {
-						gr.WriteTextSimple("\u2022", g_font_group2, g_colour_highlight, tracknum_x, ay, tnw, ah, 2, 2, 1, 1);
+						gr.WriteTextSimple("\u2022", g_font_group2, g_colour_highlight, ax, ay, tnw, ah, 2, 2, 1, 1);
 					} else {
-						gr.WriteTextSimple(ppt.enableGroupHeader ? tags.tracknumber : (i + 1), g_font, col2, tracknum_x, ay, tnw, ah, 2, 2, 1, 1);
+						gr.WriteTextSimple(ppt.enableGroupHeader ? tags.tracknumber : (i + 1), g_font, col2, ax, ay, tnw, ah, 2, 2, 1, 1);
 					}
 
 					// length part
@@ -948,7 +964,7 @@ function oBrowser() {
 
 					// rating part
 					rw = foo_playcount ? g_rating_width : 0;
-					if (this.ishover_track || tags.rating == 5 || is_selected) {
+					if (this.is_hover_track || tags.rating == 5 || is_selected) {
 						this.rating_x = ax + aw - lw - M - rw;
 						gr.WriteTextSimple(tags.rating == 5 ? chars.heart_on : chars.heart_off, g_font_material, g_colour_highlight, this.rating_x, ay, rw, ah, 2, 2);
 					}
@@ -1010,7 +1026,7 @@ function oBrowser() {
 	}
 
 	this.drawHeaderBar = function (gr) {
-		var background = !ppt.enableDynamicColours ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background;
+		var background = !ppt.enableColoursDynamic ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background;
 		fillRectangle(gr, this.hx, this.hy, this.hw, this.hh, false, background);
 		gr.FillRectangle(this.hx, this.hy + this.hh - 1, this.hw, 1, setAlpha(g_colour_text, 16));
 
@@ -1021,8 +1037,8 @@ function oBrowser() {
 			this.btn_reset.draw(gr, this.inputbox.x + this.inputbox.w, this.inputbox.y);
 		}
 
-		fillRectangle(gr, this.inputbox.x - this.inputbox.h - 10, this.inputbox.y - 5, this.inputbox.w + this.inputbox.h * 2 + 20, this.inputbox.h + 10, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
-		drawRectangle(gr, this.inputbox.x - this.inputbox.h - 10, this.inputbox.y - 5, this.inputbox.w + this.inputbox.h * 2 + 20, this.inputbox.h + 10, ppt.enableRoundedCorner, this.inputbox.edit ? g_colour_highlight : 0);
+		fillRectangle(gr, this.inputbox.x - this.inputbox.h - 10, this.inputbox.y - 5, this.inputbox.w + this.inputbox.h * 2 + 20, this.inputbox.h + 10, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
+		drawRectangle(gr, this.inputbox.x - this.inputbox.h - 10, this.inputbox.y - 5, this.inputbox.w + this.inputbox.h * 2 + 20, this.inputbox.h + 10, ppt.enableRoundedStyle, this.inputbox.edit ? g_colour_highlight : 0);
 
 		if (this.list.Count > 0) {
 			var result_count = 0;
@@ -1052,14 +1068,14 @@ function oBrowser() {
 			var volume_text = Math.ceil(this.vol2percentage(fb.Volume) * 100) + "%";
 			var volume_text_width = volume_text.calc_width2(g_font_fixed) + M;
 			var volume_text_x = x - w * 5 - volume_text_width - M * 0.5;
-			fillRectangle(gr, volume_text_x, y, volume_text_width, h, ppt.enableRoundedCorner, shade_colour(background, 10));
-			drawRectangle(gr, volume_text_x, y, volume_text_width, h, ppt.enableRoundedCorner, tint_colour(background, 10));
+			fillRectangle(gr, volume_text_x, y, volume_text_width, h, ppt.enableRoundedStyle, shade_colour(background, 10));
+			drawRectangle(gr, volume_text_x, y, volume_text_width, h, ppt.enableRoundedStyle, tint_colour(background, 10));
 			gr.WriteTextSimple(volume_text, g_font_fixed, setAlpha(g_colour_text, 200), volume_text_x, this.hy, volume_text_width, this.hh, 2, 2, 1, 1);
 		}		
 	}
 
 	this.drawBottomBar = function (gr) {
-		var background = !ppt.enableDynamicColours ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background;
+		var background = !ppt.enableColoursDynamic ? window.IsDark ? 0xff202020 : 0xfff3f3f3 : g_colour_background;
 		fillRectangle(gr, this.bx, this.by, this.bw, this.bh, false, background);
 	}
 
@@ -1311,10 +1327,6 @@ function oBrowser() {
 		case "leave":
 			break;
 		case "move":
-			// grab moving mouse location
-			this.mx = x;
-			this.my = y;
-
 			this.btn_reset.checkstate("move", x, y);
 			this.btn_play.checkstate("move", x, y);
 			this.btn_prev.checkstate("move", x, y);
@@ -1403,9 +1415,9 @@ function oBrowser() {
 
 		// settings start
 		if (!is_group_header) {
-			var colour_flag = EnableMenuIf(ppt.enableCustomColours);
-			sub1.AppendMenuItem(CheckMenuIf(ppt.enableDynamicColours), 2, "Dynamic colours");
-			sub1.AppendMenuItem(CheckMenuIf(ppt.enableCustomColours), 3, "Custom colours");
+			var colour_flag = EnableMenuIf(ppt.enableColoursCustom);
+			sub1.AppendMenuItem(CheckMenuIf(ppt.enableColoursDynamic), 2, "Colours Dynamic");
+			sub1.AppendMenuItem(CheckMenuIf(ppt.enableColoursCustom), 3, "Colours Custom");
 			sub1.AppendMenuSeparator();
 			sub1.AppendMenuItem(colour_flag, 4, "Text");
 			sub1.AppendMenuItem(colour_flag, 5, "Background");
@@ -1423,13 +1435,14 @@ function oBrowser() {
 			sub2.AppendMenuItem(GetMenuFlags(ppt.wallpapermode != 0, ppt.wallpaperblurred), 14, "Blur");
 			sub2.AppendTo(menu, MF_STRING, "Background Wallpaper");
 
-			menu.AppendMenuItem(CheckMenuIf(ppt.enableGroupBackground), 15, "Group Background");
-			menu.AppendMenuItem(CheckMenuIf(ppt.enableGroupHeader), 16, "Group Header\tCtrl+G");
-			menu.AppendMenuItem(CheckMenuIf(ppt.enableRowDual), 17, "Row Dual\tCtrl+D");
-			menu.AppendMenuItem(CheckMenuIf(ppt.enableRowStripe), 18, "Row Stripe\tCtrl+E");
+			menu.AppendMenuItem(CheckMenuIf(ppt.enableGroupBackground), 20, "Group Background\tCtrl+B");
+			menu.AppendMenuItem(CheckMenuIf(ppt.enableGroupHeader), 21, "Group Header\tCtrl+G");
+			menu.AppendMenuItem(CheckMenuIf(ppt.enableRowDual), 22, "Row Dual\tCtrl+D");
+			menu.AppendMenuItem(CheckMenuIf(ppt.enableRowStripe), 23, "Row Stripe\tCtrl+E");
+			menu.AppendMenuItem(CheckMenuIf(ppt.enableRoundedStyle), 24, "Rounded Style\tCtrl+R");
 			menu.AppendMenuSeparator();
-			menu.AppendMenuItem(MF_STRING, 19, "Reset cover cache\tF5");
-			menu.AppendMenuItem(MF_STRING, 20, "Reset settings");
+			menu.AppendMenuItem(MF_STRING, 90, "Reset cover cache\tF5");
+			menu.AppendMenuItem(MF_STRING, 100, "Reset settings");
 		}
 		// settings end
 
@@ -1472,13 +1485,13 @@ function oBrowser() {
 		case 1:
 			break;
 		case 2:
-			ppt.enableDynamicColours = !ppt.enableDynamicColours;
-			window.SetProperty("SMOOTH.DYNAMIC.COLOURS.ENABLED", ppt.enableDynamicColours);
+			ppt.enableColoursDynamic = !ppt.enableColoursDynamic;
+			window.SetProperty("SMOOTH.COLOURS.DYNAMIC.ENABLED", ppt.enableColoursDynamic);
 			on_colours_changed();
 			break
 		case 3:
-			ppt.enableCustomColours = !ppt.enableCustomColours;
-			window.SetProperty("SMOOTH.CUSTOM.COLOURS.ENABLED", ppt.enableCustomColours);
+			ppt.enableColoursCustom = !ppt.enableColoursCustom;
+			window.SetProperty("SMOOTH.COLOURS.CUSTOM.ENABLED", ppt.enableColoursCustom);
 			on_colours_changed();
 			break;
 		case 4:
@@ -1519,38 +1532,45 @@ function oBrowser() {
 			setWallpaperImg();
 			this.repaint();
 			break;
-		case 15:
+		case 20:
 			ppt.enableGroupBackground = !ppt.enableGroupBackground;
 			window.SetProperty("SMOOTH.GROUP.BACKGROUND.ENABLED", ppt.enableGroupBackground);
 			this.repaint();
 			break;
-		case 16:
+		case 21:
 			ppt.enableGroupHeader = !ppt.enableGroupHeader;
 			window.SetProperty("SMOOTH.GROUP.HEADER.ENABLED", ppt.enableGroupHeader);
 			get_metrics();
 			this.repaint();
 			brw.showNowPlaying();
 			break;
-		case 17:
+		case 22:
 			ppt.enableRowDual = !ppt.enableRowDual;
 			window.SetProperty("SMOOTH.ROW.DUAL.ENABLED", ppt.enableRowDual)
 			get_metrics();
 			this.repaint();
 			brw.showNowPlaying();
 			break;
-		case 18:
+		case 23:
 			ppt.enableRowStripe = !ppt.enableRowStripe;
 			window.SetProperty("SMOOTH.ROW.STRIPE.ENABLED", ppt.enableRowStripe)
 			get_metrics();
 			this.repaint();
 			brw.showNowPlaying();
 			break;
-		case 19:
+		case 24:
+			ppt.enableRoundedStyle = !ppt.enableRoundedStyle;
+			window.SetProperty("SMOOTH.ROUNDED.STYLE.ENABLED", ppt.enableRoundedStyle);
+			get_images();
+			brw.scrollbar.setCursorButton();
+			brw.repaint();
+			break;
+		case 90:
 			utils.RemoveFolderRecursive(CACHE_FOLDER, 1);
 			images.clear();
 			this.populate();
 			break;
-		case 20:
+		case 100:
 			window.Reload(true);
 			break;
 		case 101:

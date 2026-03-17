@@ -22,7 +22,7 @@ function oScrollbar(parent) {
 
 		this.cursorImage_normal = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_normal.GetGraphics();
-		if (ppt.enableRoundedCorner) {
+		if (ppt.enableRoundedStyle) {
 			gb.FillRoundedRectangle(sx, sy, sw, sh, sw * 0.5, sw * 0.5, setAlpha(g_colour_text, 50));
 		} else {
 			fillRectangle(gb, sx, sy, sw, sh, false, setAlpha(g_colour_text, 50));
@@ -31,7 +31,7 @@ function oScrollbar(parent) {
 
 		this.cursorImage_hover = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_hover.GetGraphics();
-		if (ppt.enableRoundedCorner) {
+		if (ppt.enableRoundedStyle) {
 			gb.FillRoundedRectangle(sx, sy, sw, sh, sw * 0.5, sw * 0.5, setAlpha(g_colour_text, 100));
 		} else {
 			fillRectangle(gb, sx, sy, sw, sh, false, setAlpha(g_colour_text, 100));
@@ -40,7 +40,7 @@ function oScrollbar(parent) {
 
 		this.cursorImage_down = utils.CreateImage(this.cursorw, this.cursorh);
 		gb = this.cursorImage_down.GetGraphics();
-		if (ppt.enableRoundedCorner) {
+		if (ppt.enableRoundedStyle) {
 			gb.FillRoundedRectangle(sx, sy, sw, sh, sw * 0.5, sw * 0.5, setAlpha(g_colour_text, 150));
 		} else {
 			fillRectangle(gb, sx, sy, sw, sh, false, setAlpha(g_colour_text, 150));

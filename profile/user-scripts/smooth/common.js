@@ -80,8 +80,7 @@ function update_extra_font_size(step) {
 function get_images() {
 	var gb;
 	var size = M * 2;
-	var font_normal = smooth_font("Material Icons", size * 0.20);
-	var font_hover = smooth_font("Material Icons", size * 0.25);
+	var font = smooth_font("Material Icons", size * 0.25);
 	var colour_normal = setAlpha(g_colour_text, 150);
 	var colour_hover = g_colour_text;
 	var colour_block = window.IsDark ? shade_colour(g_colour_text, 80) : tint_colour(g_colour_text, 80);
@@ -89,49 +88,49 @@ function get_images() {
 	// reset
 	images.reset_normal = utils.CreateImage(size, size);
 	gb = images.reset_normal.GetGraphics();
-	gb.WriteTextSimple(chars.close, font_normal, colour_normal, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(chars.close, font, colour_normal, 0, 0, size, size, 2, 2);
 	images.reset_normal.ReleaseGraphics();
 
 	images.reset_hover = utils.CreateImage(size, size);
 	gb = images.reset_hover.GetGraphics();
-	gb.WriteTextSimple(chars.close, font_hover, colour_hover, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(chars.close, font, colour_hover, 0, 0, size, size, 2, 2);
 	images.reset_hover.ReleaseGraphics();
 
 	// play
 	var char = fb.IsPlaying ? !fb.IsPlaying || fb.IsPaused ? chars.play : chars.pause : chars.stop;
 	images.play_normal = utils.CreateImage(size, size);
 	gb = images.play_normal.GetGraphics();
-	gb.WriteTextSimple(char, font_normal, colour_normal, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(char, font, colour_normal, 0, 0, size, size, 2, 2);
 	images.play_normal.ReleaseGraphics();
 
 	images.play_hover = utils.CreateImage(size, size);
 	gb = images.play_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
-	gb.WriteTextSimple(char, font_hover, colour_hover, 0, 0, size, size, 2, 2);
+	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
+	gb.WriteTextSimple(char, font, colour_hover, 0, 0, size, size, 2, 2);
 	images.play_hover.ReleaseGraphics();
 
 	// prev
 	images.prev_normal = utils.CreateImage(size, size);
 	gb = images.prev_normal.GetGraphics();
-	gb.WriteTextSimple(chars.prev, font_normal, colour_normal, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(chars.prev, font, colour_normal, 0, 0, size, size, 2, 2);
 	images.prev_normal.ReleaseGraphics();
 
 	images.prev_hover = utils.CreateImage(size, size);
 	gb = images.prev_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
-	gb.WriteTextSimple(chars.prev, font_hover, colour_hover, 0, 0, size, size, 2, 2);
+	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
+	gb.WriteTextSimple(chars.prev, font, colour_hover, 0, 0, size, size, 2, 2);
 	images.prev_hover.ReleaseGraphics();
 
 	// next
 	images.next_normal = utils.CreateImage(size, size);
 	gb = images.next_normal.GetGraphics();
-	gb.WriteTextSimple(chars.next, font_normal, colour_normal, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(chars.next, font, colour_normal, 0, 0, size, size, 2, 2);
 	images.next_normal.ReleaseGraphics();
 
 	images.next_hover = utils.CreateImage(size, size);
 	gb = images.next_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
-	gb.WriteTextSimple(chars.next, font_hover, colour_hover, 0, 0, size, size, 2, 2);
+	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
+	gb.WriteTextSimple(chars.next, font, colour_hover, 0, 0, size, size, 2, 2);
 	images.next_hover.ReleaseGraphics();
 
 	// playback order
@@ -140,28 +139,28 @@ function get_images() {
 
 	images.pord_normal = utils.CreateImage(size, size);
 	gb = images.pord_normal.GetGraphics();
-	gb.WriteTextSimple(pord_char, font_normal, pord !== 1 ? g_colour_highlight : colour_normal, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(pord_char, font, pord !== 1 ? g_colour_highlight : colour_normal, 0, 0, size, size, 2, 2);
 	images.pord_normal.ReleaseGraphics();
 
 	images.pord_hover = utils.CreateImage(size, size);
 	gb = images.pord_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
-	gb.WriteTextSimple(pord_char, font_hover, pord !== 1 ? g_colour_highlight : colour_hover, 0, 0, size, size, 2, 2);
+	fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
+	gb.WriteTextSimple(pord_char, font, pord !== 1 ? g_colour_highlight : colour_hover, 0, 0, size, size, 2, 2);
 	images.pord_hover.ReleaseGraphics();
 
 	// dark/light mode in CUI
 	images.mode_normal = utils.CreateImage(size, size);
 	gb = images.mode_normal.GetGraphics();
-	gb.WriteTextSimple(window.IsDark ? chars.light : chars.dark, font_normal, window.IsDefaultUI ? colour_block : colour_normal, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(window.IsDark ? chars.dark : chars.light, font, window.IsDefaultUI ? colour_block : colour_normal, 0, 0, size, size, 2, 2);
 	images.mode_normal.ReleaseGraphics();
 
 	images.mode_hover = utils.CreateImage(size, size);
 	gb = images.mode_hover.GetGraphics();
 	if (window.IsDefaultUI) {
 	} else {
-		fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
+		fillRectangle(gb, 0, 0, size, size, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
 	}
-	gb.WriteTextSimple(window.IsDark ? chars.light : chars.dark, window.IsDefaultUI ? font_normal : font_hover, window.IsDefaultUI ? colour_block : colour_hover, 0, 0, size, size, 2, 2);
+	gb.WriteTextSimple(window.IsDark ? chars.dark : chars.light, font, window.IsDefaultUI ? colour_block : colour_hover, 0, 0, size, size, 2, 2);
 	images.mode_hover.ReleaseGraphics();
 
 	// add folder in empty normal playlist
@@ -171,19 +170,19 @@ function get_images() {
 
 	images.add_folder_normal = utils.CreateImage(add_folder_width, bh);
 	gb = images.add_folder_normal.GetGraphics();
-	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
+	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(add_folder_text, g_font, g_colour_text, 0, 0, add_folder_width, bh, 2, 2);
 	images.add_folder_normal.ReleaseGraphics();
 
 	images.add_folder_hover = utils.CreateImage(add_folder_width, bh);
 	gb = images.add_folder_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 32));
+	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedStyle, setAlpha(g_colour_text, 32));
 	gb.WriteTextSimple(add_folder_text, g_font, g_colour_text, 0, 0, add_folder_width, bh, 2, 2);
 	images.add_folder_hover.ReleaseGraphics();
 
 	images.add_folder_down = utils.CreateImage(add_folder_width, bh);
 	gb = images.add_folder_down.GetGraphics();
-	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 48));
+	fillRectangle(gb, 0, 0, add_folder_width, bh, ppt.enableRoundedStyle, setAlpha(g_colour_text, 48));
 	gb.WriteTextSimple(add_folder_text, g_font, g_colour_text, 0, 0, add_folder_width, bh, 2, 2);
 	images.add_folder_down.ReleaseGraphics();
 
@@ -193,19 +192,19 @@ function get_images() {
 
 	images.edit_query_normal = utils.CreateImage(edit_query_width, bh);
 	gb = images.edit_query_normal.GetGraphics();
-	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 16));
+	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedStyle, setAlpha(g_colour_text, 16));
 	gb.WriteTextSimple(edit_query_text, g_font, g_colour_text, 0, 0, edit_query_width, bh, 2, 2);
 	images.edit_query_normal.ReleaseGraphics();
 
 	images.edit_query_hover = utils.CreateImage(edit_query_width, bh);
 	gb = images.edit_query_hover.GetGraphics();
-	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 32));
+	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedStyle, setAlpha(g_colour_text, 32));
 	gb.WriteTextSimple(edit_query_text, g_font, g_colour_text, 0, 0, edit_query_width, bh, 2, 2);
 	images.edit_query_hover.ReleaseGraphics();
 
 	images.edit_query_down = utils.CreateImage(edit_query_width, bh);
 	gb = images.edit_query_down.GetGraphics();
-	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedCorner, setAlpha(g_colour_text, 48));
+	fillRectangle(gb, 0, 0, edit_query_width, bh, ppt.enableRoundedStyle, setAlpha(g_colour_text, 48));
 	gb.WriteTextSimple(edit_query_text, g_font, g_colour_text, 0, 0, edit_query_width, bh, 2, 2);
 	images.edit_query_down.ReleaseGraphics();
 
@@ -273,11 +272,11 @@ function drawImage(gr, img, dst_x, dst_y, dst_w, dst_h, auto_fill, opacity, bord
 	if (!img || !dst_w || !dst_h)
 		return;
 
-	var rounded_mask = utils.CreateImage(img.Width, img.Height);
-	var temp_gr = rounded_mask.GetGraphics();
-	temp_gr.FillRoundedRectangle(0, 0, img.Width, img.Height, img.Width * 0.05, img.Height * 0.05, 0xff000000);
-	rounded_mask.ReleaseGraphics();
-	temp_gr = null;
+	var mask = utils.CreateImage(img.Width, img.Height);
+	var gb = mask.GetGraphics();
+	gb.FillRoundedRectangle(0, 0, img.Width, img.Height, img.Width * 0.05, img.Height * 0.05, 0xff000000);
+	mask.ReleaseGraphics();
+	gb = null;
 
 	if (auto_fill) {
 		if (img.Width / img.Height < dst_w / dst_h) {
@@ -292,11 +291,11 @@ function drawImage(gr, img, dst_x, dst_y, dst_w, dst_h, auto_fill, opacity, bord
 			var src_x = Math.round((img.Width - src_w) / 2);
 		}
 		if (round) {
-			gr.DrawImageWithMask(img, rounded_mask, dst_x, dst_y, dst_w, dst_h);
+			gr.DrawImageWithMask(img, mask, dst_x, dst_y, dst_w, dst_h);
 			gr.DrawRoundedRectangle(dst_x, dst_y, dst_w, dst_h, dst_w * 0.05, dst_h * 0.05, 1, border);
 		} else {
 			gr.DrawImage(img, dst_x, dst_y, dst_w, dst_h, src_x + 3, src_y + 3, src_w - 6, src_h - 6, opacity || 1);
-			gr.DrawRectangle(dst_x, dst_y, dst_w, dst_h, 1, border);
+			gr.DrawRectangle(dst_x, dst_y, dst_w - 1, dst_h - 1, 1, border);
 		}
 	} else {
 		var s = Math.min(dst_w / img.Width, dst_h / img.Height);
@@ -307,11 +306,11 @@ function drawImage(gr, img, dst_x, dst_y, dst_w, dst_h, auto_fill, opacity, bord
 		dst_w = w;
 		dst_h = h;
 		if (round) {
-			gr.DrawImageWithMask(img, rounded_mask, dst_x, dst_y, dst_w, dst_h);
+			gr.DrawImageWithMask(img, mask, dst_x, dst_y, dst_w, dst_h);
 			gr.DrawRoundedRectangle(dst_x, dst_y, dst_w, dst_h, dst_w * 0.05, dst_h * 0.05, 1, border);
 		} else {
 			gr.DrawImage(img, dst_x, dst_y, dst_w, dst_h, 0, 0, img.Width, img.Height, opacity || 1);
-			gr.DrawRectangle(dst_x, dst_y, dst_w, dst_h, 1, border);
+			gr.DrawRectangle(dst_x, dst_y, dst_w - 1, dst_h - 1, 1, border);
 		}
 	}
 }
@@ -568,7 +567,7 @@ function is_close_to_grayscale(colour) {
 }
 
 function get_colours() {
-	if (ppt.enableDynamicColours) {
+	if (ppt.enableColoursDynamic) {
 		var arr = GetNowPlayingColours();
 		if (arr.length) {
 			g_colour_background = arr[0];
@@ -588,7 +587,7 @@ function get_colours() {
 		}
 	}
 
-	if (ppt.enableCustomColours) {
+	if (ppt.enableColoursCustom) {
 		g_colour_background = window.GetProperty("SMOOTH.COLOUR.BACKGROUND.NORMAL", RGB(0, 0, 0));
 		g_colour_text = window.GetProperty("SMOOTH.COLOUR.TEXT", RGB(255, 255, 255));
 		g_colour_selection = window.GetProperty("SMOOTH.COLOUR.BACKGROUND.SELECTED", RGB(0, 102, 204));
@@ -663,9 +662,9 @@ var images = {
 }
 
 var ppt = {
-	enableDynamicColours : window.GetProperty("SMOOTH.DYNAMIC.COLOURS.ENABLED", false),
-	enableCustomColours: window.GetProperty("SMOOTH.CUSTOM.COLOURS.ENABLED", false),
-	enableRoundedCorner: window.GetProperty("SMOOTH.ROUNDED.CORNER.ENABLED", true),
+	enableColoursDynamic : window.GetProperty("SMOOTH.COLOURS.DYNAMIC.ENABLED", false),
+	enableColoursCustom: window.GetProperty("SMOOTH.COLOURS.CUSTOM.ENABLED", false),
+	enableRoundedStyle: window.GetProperty("SMOOTH.ROUNDED.STYLE.ENABLED", true),
 	wallpapermode: window.GetProperty("SMOOTH.WALLPAPER.MODE", 0), // 0 none, 1 front cover 2 custom image
 	wallpaperblurred: window.GetProperty("SMOOTH.WALLPAPER.BLURRED", false),
 	wallpaperblur: window.GetProperty("SMOOTH.WALLPAPER.BLUR", 150),
@@ -676,7 +675,7 @@ var ppt = {
 	refreshRate: 25,
 	rowHeight: 0,
 	rowScrollStep: 3,
-	scrollSmoothness: 2.5,
+	scrollSmoothness: 1.5,
 };
 
 var CACHE_FOLDER = fb.ProfilePath + "cache\\";
