@@ -492,7 +492,7 @@ function smooth_font(name, size, weight, style) {
 	return JSON.stringify({
 		Name : name,
 		Size : scale(size),
-		Weight : typeof weight == "number" ? weight : DWRITE_FONT_WEIGHT_REGULAR,
+		Weight : typeof weight == "number" ? weight : DWRITE_FONT_WEIGHT_MEDIUM,
 		Style : typeof style == "number" ? style : 0
 	});
 }
@@ -506,9 +506,9 @@ function get_font() {
 	var size = ppt.fontSize;
 
 	g_font = smooth_font(name, size);
-	g_font_bold = smooth_font(name, size, DWRITE_FONT_WEIGHT_SEMI_BOLD);
-	g_font_group1 = smooth_font(name, size + 6, DWRITE_FONT_WEIGHT_SEMI_BOLD);
-	g_font_group2 = smooth_font(name, size + 2, DWRITE_FONT_WEIGHT_SEMI_BOLD);
+	g_font_bold = smooth_font(name, size, DWRITE_FONT_WEIGHT_BOLD);
+	g_font_group1 = smooth_font(name, size + 6, DWRITE_FONT_WEIGHT_BOLD);
+	g_font_group2 = smooth_font(name, size + 2, DWRITE_FONT_WEIGHT_BOLD);
 	g_font_material = smooth_font("Material Icons", size + 2);
 
 	g_rating_width = chars.heart_on.calc_width2(g_font_material);
@@ -570,7 +570,7 @@ function get_colours() {
 	if (ppt.enableDynamicColours) {
 		var arr = GetNowPlayingColours();
 		if (arr.length) {
-			g_colour_background = arr[0];/*blendColours(arr[0], g_colour_splitter, 0.1);*/
+			g_colour_background = arr[0];
 			g_colour_text = arr[1];
 			g_colour_selection = arr[2];
 			g_colour_selected_text = arr[3];
