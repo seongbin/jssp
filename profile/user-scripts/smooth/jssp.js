@@ -183,7 +183,9 @@ function on_key_down(vkey) {
 				window.SetProperty("SMOOTH.ROW.DUAL.ENABLED", ppt.enableRowDual);
 				get_metrics();
 				brw.repaint();
-				brw.showNowPlaying();
+				if (plman.ActivePlaylist == plman.PlayingPlaylist) {
+					brw.showNowPlaying();
+				}
 				break;
 			case 69: // CTRL+E
 				ppt.enableRowStripe = !ppt.enableRowStripe;
@@ -196,7 +198,9 @@ function on_key_down(vkey) {
 				window.SetProperty("SMOOTH.GROUP.HEADER.ENABLED", ppt.enableGroupHeader);
 				get_metrics();
 				brw.repaint();
-				brw.showNowPlaying();
+				if (plman.ActivePlaylist == plman.PlayingPlaylist) {
+					brw.showNowPlaying();
+				}
 				break;
 			case 82: // CTRL+R
 				ppt.enableRoundedStyle = !ppt.enableRoundedStyle;
@@ -502,6 +506,9 @@ function on_playlist_switch() {
 	g_focus_id = getFocusId();
 	get_images();
 	brw.populate();
+	if (g_active_playlist == plman.PlayingPlaylist) {
+		brw.showNowPlaying();
+	}
 }
 
 function on_playlists_changed() {
@@ -783,7 +790,7 @@ function oBrowser() {
 	var album_totals = {};
 	var album_count_sum = {};
 	for (var i = 0; i < this.groups.length; i++) {
-		var album_key = this.groups[i].album + " ^^ " + this.groups[i].artist + " ^^ " + this.groups[i].date + " ^^ " + this.groups[i].copyright;
+		var album_key = this.groups[i].album + " ^^ " + this.groups[i].artist + " ^^ " + this.groups[i].date + " ^^ " + this.groups[i].publisher;
 		if (!album_totals[album_key]) {
 			album_totals[album_key] = 0;
 			album_count_sum[album_key] = 0;
@@ -792,7 +799,7 @@ function oBrowser() {
 		album_count_sum[album_key] += this.groups[i].count;
 	}
 	for (var i = 0; i < this.groups.length; i++) {
-		var album_key = this.groups[i].album + " ^^ " + this.groups[i].artist + " ^^ " + this.groups[i].date + " ^^ " + this.groups[i].copyright;
+		var album_key = this.groups[i].album + " ^^ " + this.groups[i].artist + " ^^ " + this.groups[i].date + " ^^ " + this.groups[i].publisher;
 		this.groups[i].totaltracks = album_totals[album_key];
 		this.groups[i].albumCountSum = album_count_sum[album_key];
 	}
@@ -895,13 +902,13 @@ function oBrowser() {
 						var text_y = ay + (group_height - g_font_group2_height) * 0.5;
 						gr.WriteTextSimple(group.album, g_font_group1, normal_text, text_x, text_y - g_font_group1_height - scale(2), text_width, g_font_group1_height, 0, 1, 1, 1);
 						gr.WriteTextSimple(group.artist, g_font_group2, fader_text, text_x, text_y, text_width, g_font_group2_height, 0, 1, 1, 1);
-						gr.WriteTextSimple(group.date + " \u2022 " + group_count + " \u2022 " + group_length + " \u2022 " + group.copyright, g_font, fader_text, text_x, text_y + g_font_group2_height + scale(2), text_width, g_font_height, 0, 1, 1, 1);
+						gr.WriteTextSimple(group.date + " \u2022 " + group_count + " \u2022 " + group_length + " \u2022 " + group.publisher, g_font, fader_text, text_x, text_y + g_font_group2_height + scale(2), text_width, g_font_height, 0, 1, 1, 1);
 					} else {
 						var date_width = group.date.calc_width2(g_font) + M;
-						var copyright_width = group.copyright.calc_width2(g_font) + M;
-						var right_width = Math.min(Math.max(date_width, copyright_width), aw * 0.35);
+						var publisher_width = group.publisher.calc_width2(g_font) + M;
+						var right_width = Math.min(Math.max(date_width, publisher_width), aw * 0.35);
 						gr.WriteTextSimple(group.date, g_font, fader_text, ax + aw - right_width - M, ay + group_height * 0.5 - g_font_height, right_width, g_font_height, 1, 1, 1, 1);
-						gr.WriteTextSimple(group.copyright, g_font, fader_text, ax + aw - right_width - M, ay + group_height * 0.5, right_width, g_font_height, 1, 1, 1, 1);
+						gr.WriteTextSimple(group.publisher, g_font, fader_text, ax + aw - right_width - M, ay + group_height * 0.5, right_width, g_font_height, 1, 1, 1, 1);
 						gr.WriteTextSimple(group.album, g_font_group2, normal_text, text_x, ay + group_height * 0.5 - g_font_group2_height, aw - right_width - group_height - M * 2, g_font_group2_height, 0, 1, 1, 1);
 						gr.WriteTextSimple(group.artist, g_font_group2, fader_text, text_x, ay + group_height * 0.5, aw - right_width - group_height - M * 2, g_font_group2_height, 0, 1, 1, 1);
 					}
@@ -910,8 +917,7 @@ function oBrowser() {
 				case -1:
 					var disc_group = this.groups[this.rows[i].albumId];
 					var disc_text = "Disc " + disc_group.discnumber + " / " + disc_group.totaldiscs;
-					gr.WriteTextSimple(chars.disc, g_font_material, fader_text, ax, ay, ah, ah, 2, 2, 1, 1);
-					gr.WriteTextSimple(disc_text, g_font, fader_text, ax + ah, ay, aw - ah, ah, 0, 2, 1, 1);
+					gr.WriteTextSimple(disc_text, g_font, fader_text, ax, ay, aw, ah, 0, 2, 1, 1);
 					break;
 				case -2:
 					var subgroup_text = this.rows[i].subgroupName;
@@ -927,13 +933,13 @@ function oBrowser() {
 							lastTrackIdx = j;
 						}
 					}
-					if (firstTrackIdx !== -1 && ppt.enableRowStripe) {
+					if (firstTrackIdx !== -1) {
 						var sub_ay = Math.floor(this.y + (firstTrackIdx * ah) - scroll_);
 						var sub_ah = (lastTrackIdx - firstTrackIdx + 1) * ah;
 						fillRectangle(gr, ax, sub_ay, aw, sub_ah, ppt.enableRoundedStyle, setAlpha(g_colour_text, 8));
 					}
 
-					gr.WriteTextSimple(subgroup_text, g_font, setAlpha(g_colour_text, 150), ax, ay, aw, ah, 0, 2, 1, 1);
+					gr.WriteTextSimple(subgroup_text, g_font, fader_text, ax, ay, aw, ah, 0, 2, 1, 1);
 
 					/*
 					var subgroup_text_width = Math.min(subgroup_text.calc_width2(g_font), aw - M * 2);
@@ -980,11 +986,9 @@ function oBrowser() {
 					}
 
 					if (is_selected) {
-						// fillRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedStyle, setAlpha(g_colour_text, 24));
 					}
 
 					if (is_focused) {
-						// drawRectangle(gr, ax, ay, aw, ah, ppt.enableRoundedStyle, setAlpha(g_colour_selection, 200));
 					}
 
 					// hovered row
@@ -1049,14 +1053,14 @@ function oBrowser() {
 		} else {
 			if (plman.IsAutoPlaylist(g_active_playlist)) {
 				if (this.inputbox.text.length == 0) {
-					this.btn_edit_query.draw(gr, this.x + (this.w - images.edit_query_normal.Width) * 0.5, wh * 0.5 - images.edit_query_normal.Height);
+					this.btn_edit_query.draw(gr, this.x + (this.w - images.edit_query_normal.Width) * 0.5, this.y + this.h * 0.5 - images.edit_query_normal.Height * 1.5);
 				}
 			} else if (plman.GetPlaylistItemCount(g_active_playlist) == 0) {
-				this.btn_add_folder.draw(gr, this.x + (this.w - images.add_folder_normal.Width) * 0.5, wh * 0.5 - images.add_folder_normal.Height);
+				this.btn_add_folder.draw(gr, this.x + (this.w - images.add_folder_normal.Width) * 0.5, this.y + this.h * 0.5 - images.add_folder_normal.Height * 1.5);
 			}
 
 			var text = (this.inputbox.text.length > 0) ? "(˚Δ˚)b\nNothing found " : (plman.IsAutoPlaylist(g_active_playlist) ? "Autoplaylist " : "") + "<" + plman.GetPlaylistName(g_active_playlist) + "> is empty!";
-			gr.WriteTextSimple(text, g_font_group2, setAlpha(g_colour_text, 100), this.x, this.y + images.edit_query_normal.Height, this.w, this.h, 2, 2, 1, 1);
+			gr.WriteTextSimple(text, g_font_group2, setAlpha(g_colour_text, 100), this.x, this.y, this.w, this.h, 2, 2, 1, 1);
 		}
 
 		// scrollbar part
@@ -1123,7 +1127,7 @@ function oBrowser() {
 
 		// leftpane part
 		gr.WriteTextSimple(ppt.enableLeftPane ? chars.arrow_left : chars.arrow_right, g_font_material, this.ishover_left ? g_colour_text : setAlpha(g_colour_text, 32), this.lx + this.lw, this.y, this.x - this.lx - this.lw, this.h, 2, 2, 1, 1);
-		if (g_left_delta > 0 && g_left_time == 0) {
+		if ((g_left_delta > 0 && g_left_time == 0) || ppt.enableLeftPane) {
 			this.btn_playlists.draw(gr, this.hx + M * 0.5, this.hy + (this.hh - images.playlists_normal.Height) * 0.5);
 			this.btn_history.draw(gr, this.btn_playlists.x + images.playlists_normal.Width + M * 0.5, this.hy + (this.hh - images.history_normal.Height) * 0.5);
 		}
@@ -1509,7 +1513,6 @@ function oBrowser() {
 			sub1.AppendMenuSeparator();
 			sub1.AppendMenuItem(colour_flag, 4, "Text");
 			sub1.AppendMenuItem(colour_flag, 5, "Background");
-			sub1.AppendMenuItem(colour_flag, 6, "Selected background");
 			sub1.AppendTo(menu, MF_STRING, "Colours");
 			menu.AppendMenuSeparator();
 
@@ -1592,11 +1595,6 @@ function oBrowser() {
 			window.SetProperty("SMOOTH.COLOUR.BACKGROUND.NORMAL", g_colour_background);
 			on_colours_changed();
 			break;
-		case 6:
-			g_colour_selection = utils.ColourPicker(g_colour_selection);
-			window.SetProperty("SMOOTH.COLOUR.BACKGROUND.SELECTED", g_colour_selection);
-			on_colours_changed();
-			break;
 		case 10:
 		case 11:
 		case 12:
@@ -1630,21 +1628,27 @@ function oBrowser() {
 			window.SetProperty("SMOOTH.GROUP.HEADER.ENABLED", ppt.enableGroupHeader);
 			get_metrics();
 			this.repaint();
-			brw.showNowPlaying();
+			if (plman.ActivePlaylist == plman.PlayingPlaylist) {
+				brw.showNowPlaying();
+			}
 			break;
 		case 22:
 			ppt.enableRowDual = !ppt.enableRowDual;
 			window.SetProperty("SMOOTH.ROW.DUAL.ENABLED", ppt.enableRowDual)
 			get_metrics();
 			this.repaint();
-			brw.showNowPlaying();
+			if (plman.ActivePlaylist == plman.PlayingPlaylist) {
+				brw.showNowPlaying();
+			}
 			break;
 		case 23:
 			ppt.enableRowStripe = !ppt.enableRowStripe;
 			window.SetProperty("SMOOTH.ROW.STRIPE.ENABLED", ppt.enableRowStripe)
 			get_metrics();
 			this.repaint();
-			brw.showNowPlaying();
+			if (plman.ActivePlaylist == plman.PlayingPlaylist) {
+				brw.showNowPlaying();
+			}
 			break;
 		case 24:
 			ppt.enableRoundedStyle = !ppt.enableRoundedStyle;
@@ -1802,7 +1806,7 @@ function oGroup(index, start, handle, groupkey, cachekey) {
 	this.album = arr[0];
 	this.artist = arr[1];
 	this.date = format_date(arr[2].slice(0, 10));
-	this.copyright = arr[3]; // copyright/url/genre
+	this.publisher = arr[3]; // publisher/url/genre
 	this.totaltracks = parseInt(arr[4], 10);
 	this.discnumber = parseInt(arr[5], 10);
 	this.totaldiscs = parseInt(arr[6], 10);
@@ -2027,7 +2031,6 @@ function oPlaylistManager() {
 						recycle_arr.push(i);
 						recycle.AppendMenuItem(MF_STRING, 2101 + i, plman.GetRecyclerName(i));
 					}
-					recycle.AppendMenuSeparator();
 				}
 
 				var idx = menu.TrackPopupMenu(x, y);
@@ -2216,7 +2219,9 @@ function clear_search() {
 	g_search_index = 0;
 	g_search_indexes = [];
 	g_sendResponse();
-	brw.showNowPlaying();
+	if (plman.ActivePlaylist == plman.PlayingPlaylist) {
+		brw.showNowPlaying();
+	}
 }
 
 function kill_scrollbar_timer() {
@@ -2437,7 +2442,7 @@ ppt.enableRowStripe = window.GetProperty("SMOOTH.ROW.STRIPE.ENABLED", true);
 
 ppt.time_tf = "$if3(-%playback_time_remaining%,%playback_time%,)";
 ppt.track_tf = "$if2([%artist%],N/A) ^^ [%title%] ^^ [%genre%] ^^ [%album%] ^^ $if2($num([%tracknumber%],1),00) ^^ [%length%] ^^ $if2(%rating%,0) ^^ [%play_count%] ^^ [%added%] ^^ [%track artist%]";
-ppt.groupkey_tf = "$if2(%album%,$if(%length%,'('Singles')',%title%)) ^^ $if2(%album artist%,$if(%length%,%directory%,N/A)) ^^ $if2([%date%],N/A) ^^ $if3([%copyright%],[%url%],[%genre%]) ^^ $num([%totaltracks%],1) ^^ $if2(%discnumber%,1) ^^ $if2(%totaldiscs%,1)";
+ppt.groupkey_tf = "$if2(%album%,$if(%length%,'('Singles')',%title%)) ^^ $if2(%album artist%,$if(%length%,%directory%,N/A)) ^^ $if2([%date%],N/A) ^^ $if3([%publisher%],[%url%],[%genre%]) ^^ $num([%totaltracks%],1) ^^ $if2(%discnumber%,1) ^^ $if2(%totaldiscs%,1)";
 
 var tfo = {
 	time: fb.TitleFormat(ppt.time_tf),

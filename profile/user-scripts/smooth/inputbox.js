@@ -68,7 +68,8 @@ function oInputbox(live_update, default_text, empty_text, func, parent) {
 			}
 
 			var selection_width = this.x + px1 + px2 - px1 > this.x + this.w ? this.w - px1 : px2 - px1;
-			gr.FillRectangle(this.x + px1, this.y + (this.h - g_font_height) * 0.5 - 5, selection_width, g_font_height + 10, setAlpha(g_colour_selection, 100));
+			var selection_background = setAlpha(blendColours(g_colour_background, g_colour_text, 0.5), 100);
+			gr.FillRectangle(this.x + px1, this.y + (this.h - g_font_height) * 0.5 - 5, selection_width, g_font_height + 10, selection_background);
 		} else {
 			this.select = false;
 			this.text_selected = "";

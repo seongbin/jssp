@@ -275,7 +275,7 @@ function get_images() {
 	images.history_down.ReleaseGraphics();
 
 	// force re-creation of buttons with new colours
-	if (typeof brw == 'object') brw.setSize();
+	if (typeof brw == "object") brw.setSize();
 }
 
 function validate_indexes(playlist, item) {
@@ -361,7 +361,7 @@ function drawImage(gr, img, dst_x, dst_y, dst_w, dst_h, auto_fill, opacity, bord
 			gr.DrawRoundedRectangle(dst_x, dst_y, dst_w, dst_h, dst_w * 0.05, dst_h * 0.05, 1, border);
 		} else {
 			gr.DrawImage(img, dst_x, dst_y, dst_w, dst_h, src_x + 3, src_y + 3, src_w - 6, src_h - 6, opacity || 1);
-			gr.DrawRectangle(dst_x, dst_y, dst_w - 1, dst_h - 1, 1, border);
+			gr.DrawRectangle(dst_x, dst_y, dst_w, dst_h, 1, border);
 		}
 	} else {
 		var s = Math.min(dst_w / img.Width, dst_h / img.Height);
@@ -376,7 +376,7 @@ function drawImage(gr, img, dst_x, dst_y, dst_w, dst_h, auto_fill, opacity, bord
 			gr.DrawRoundedRectangle(dst_x, dst_y, dst_w, dst_h, dst_w * 0.05, dst_h * 0.05, 1, border);
 		} else {
 			gr.DrawImage(img, dst_x, dst_y, dst_w, dst_h, 0, 0, img.Width, img.Height, opacity || 1);
-			gr.DrawRectangle(dst_x, dst_y, dst_w - 1, dst_h - 1, 1, border);
+			gr.DrawRectangle(dst_x, dst_y, dst_w, dst_h, 1, border);
 		}
 	}
 }
@@ -639,8 +639,6 @@ function get_colours() {
 		if (arr.length) {
 			g_colour_background = arr[0];
 			g_colour_text = arr[1];
-			g_colour_selection = arr[2];
-			g_colour_selected_text = arr[3];
 			g_colour_highlight = g_colour_text;
 			g_themed = false;
 			get_images();
@@ -648,8 +646,6 @@ function get_colours() {
 		} else {
 			g_colour_background = 0xff000000;
 			g_colour_text = 0xffffffff;
-			g_colour_selection = 0xffb6b6b6;
-			g_colour_selection_text = g_colour_text;
 			g_colour_highlight = g_colour_text;
 		}
 	}
@@ -657,23 +653,18 @@ function get_colours() {
 	if (ppt.enableColoursCustom) {
 		g_colour_background = window.GetProperty("SMOOTH.COLOUR.BACKGROUND.NORMAL", RGB(0, 0, 0));
 		g_colour_text = window.GetProperty("SMOOTH.COLOUR.TEXT", RGB(255, 255, 255));
-		g_colour_selection = window.GetProperty("SMOOTH.COLOUR.BACKGROUND.SELECTED", RGB(0, 102, 204));
-		g_colour_selected_text = DetermineTextColour(g_colour_selection);
 		g_colour_highlight = g_colour_text;
 		g_themed = false;
 	} else {
 		if (window.IsDefaultUI) {
 			g_colour_background = window.GetColourDUI(ColourTypeDUI.background);
 			g_colour_text = /*window.GetColourDUI(ColourTypeDUI.text);*/DetermineTextColour(g_colour_background);
-			g_colour_selection = window.GetColourDUI(ColourTypeDUI.selection);
 			g_colour_highlight = window.GetColourDUI(ColourTypeDUI.highlight);
 		} else {
 			g_colour_background = window.GetColourCUI(ColourTypeCUI.background);
 			g_colour_text = /*window.GetColourCUI(ColourTypeCUI.text);*/DetermineTextColour(g_colour_background);
-			g_colour_selection = window.GetColourCUI(ColourTypeCUI.inactive_selection_text);
 			g_colour_highlight = window.GetColourCUI(ColourTypeCUI.inactive_selection_text);
 		}
-		g_colour_selected_text = DetermineTextColour(g_colour_selection);
 	}
 
 	g_colour_splitter = !window.IsDark ? 0xfff0f0f0 : window.IsDefaultUI ? 0xff424242 : 0xff333333;
@@ -753,8 +744,6 @@ utils.CreateFolder(CACHE_FOLDER);
 chars.add_folder = "\ue2cc";
 chars.edit_query = "\ue3c9";
 chars.close = "\ue14c";
-chars.disc = "\ue019",
-chars.menu = "\ue5d2",
 chars.search = "\ue8b6";
 chars.dark = "\ue51c";
 chars.light = "\ue518";
@@ -785,9 +774,7 @@ var g_font_group2;
 var g_font_material;
 
 var g_colour_text = 0;
-var g_colour_selected_text = 0;
 var g_colour_background = 0;
-var g_colour_selection = 0;
 var g_colour_highlight = 0;
 var g_colour_splitter = 0;
 
