@@ -1018,7 +1018,12 @@ function oBrowser() {
 					rw = foo_playcount ? g_rating_width : 0;
 					if (this.is_hover_track || tags.rating == 5 || is_selected) {
 						this.rating_x = ax + aw - lw - M - rw;
-						gr.WriteTextSimple(tags.rating == 5 ? chars.heart_on : chars.heart_off, g_font_material, g_colour_highlight, this.rating_x, ay, rw, ah, 2, 2);
+						this.is_hover_rating = this.is_hover_track && m_x > this.rating_x && m_x < this.rating_x + rw && m_y > ay && m_y < ay + ah;
+						if (this.is_hover_rating) {
+							gr.WriteTextSimple(tags.rating == 5 ? chars.heart_broken : chars.heart_on, g_font_material, g_colour_highlight, this.rating_x, ay, rw, ah, 2, 2);
+						} else {
+							gr.WriteTextSimple(tags.rating == 5 ? chars.heart_on : chars.heart_off, g_font_material, g_colour_highlight, this.rating_x, ay, rw, ah, 2, 2);
+						}
 					}
 
 					var display_title = this.rows[i].subgrouped ? this.rows[i].subgroupTitle : tags.title;
@@ -1786,7 +1791,7 @@ function oBrowser() {
 	this.track_tf_arr = [];
 	this.old_activeRow = -1;
 	this.nowplaying_y = 0;
-	this.inputbox = new oInputbox(true, "", "Filter playlist (F3)", g_sendResponse, this);
+	this.inputbox = new oInputbox(true, "", "Search (F3)", g_sendResponse, this);
 }
 
 function oGroup(index, start, handle, groupkey, cachekey) {
